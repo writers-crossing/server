@@ -1,4 +1,5 @@
-// https://discord.com/api/oauth2/authorize?client_id=1102699152770605087&permissions=8&scope=bot%20applications.commands
+// https://discord.com/api/oauth2/authorize?client_id=1102814795012522024&permissions=58272035371840&scope=bot%20applications.commands
+// https://discord.com/api/oauth2/authorize?client_id=1102699152770605087&permissions=58272035371840&scope=bot%20applications.commands
 
 import { initialize as database_initialize } from './app/database.js'
 
