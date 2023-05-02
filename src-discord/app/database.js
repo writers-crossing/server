@@ -34,7 +34,14 @@ export const WcEntry = sequelize.define('WcEntries', {
     },
     timestamp: { type: DataTypes.DATE, allowNull: false },
     wordCount: { type: DataTypes.NUMBER, allowNull: false },
-    project: { type: DataTypes.STRING, allowNull: true }
+    project: { type: DataTypes.STRING, allowNull: true },
+    userId: {
+        type: Sequelize.UUID,
+        references: {
+           model: 'Users',
+           key: 'id'
+        }
+     }
 })
 
 export const initialize = async () => {
@@ -63,10 +70,10 @@ export const getUser = async (discordId, discordUsername, nickname) => {
 
 export const addWordCount = async (userId, wordCount, project) => {
     await WcEntry.create({
-        userId: userId,
         timestamp: Date.now(),
         wordCount: wordCount,
-        project: project
+        project: project,
+        userId: userId
     })
 
     await recalculateUserStats(userId)
@@ -123,6 +130,3 @@ export const recalculateUserStats = async (userId) => {
         wcTotal: wcTotal
     })
 }
-
-User.hasMany(WcEntry, { foreignKey: 'userId' })
-WcEntry.belongsTo(User, { foreignKey: 'userId' })
