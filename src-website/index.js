@@ -1,8 +1,10 @@
 import express from 'express'
 import { engine } from 'express-handlebars'
 
+import config from '../data/config.json' assert { type: "json" }
+
 const app = express()
-const port = process.env.EXPRESS_PORT
+const port = config.expressPort
 
 app.engine('handlebars', engine());
 app.set('view engine', 'handlebars');
@@ -13,5 +15,5 @@ app.get('/', (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(`App listening on port ${port}`)
 })

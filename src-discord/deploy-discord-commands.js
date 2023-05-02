@@ -2,7 +2,7 @@ import { REST, Routes } from 'discord.js'
 import { readdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import config from './config.json' assert { type: "json" }
+import config from './../data/config.json' assert { type: "json" }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -28,7 +28,7 @@ for (const folder of commandFolders) {
 }
 
 // Construct and prepare an instance of the REST module
-const rest = new REST().setToken(config.token);
+const rest = new REST().setToken(config.discordToken);
 
 // and deploy your commands!
 (async () => {
@@ -37,7 +37,7 @@ const rest = new REST().setToken(config.token);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands(config.clientId, config.guildId),
+			Routes.applicationGuildCommands(config.discordClientId, config.discordGuildId),
 			{ body: commands },
 		);
 

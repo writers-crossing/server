@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getUser, addWordCount } from '../../../app/database.js'
+import { getUser, addWordCount } from '../../app/database.js'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
