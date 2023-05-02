@@ -34,15 +34,11 @@ export const WcEntry = sequelize.define('WcEntries', {
     },
     timestamp: { type: DataTypes.DATE, allowNull: false },
     wordCount: { type: DataTypes.NUMBER, allowNull: false },
-    project: { type: DataTypes.STRING, allowNull: true },
-    userId: {
-        type: Sequelize.UUID,
-        references: {
-           model: 'Users',
-           key: 'id'
-        }
-     }
+    project: { type: DataTypes.STRING, allowNull: true }
 })
+
+User.hasMany(WcEntry, { foreignKey: 'userId' })
+WcEntry.belongsTo(User, { foreignKey: 'userId' })
 
 export const initialize = async () => {
     await sequelize.sync({ force: false, alter: true })
