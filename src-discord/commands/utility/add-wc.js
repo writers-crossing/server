@@ -49,7 +49,7 @@ export async function execute(interaction) {
 	await user.reload()
 
 	if (sprintId) {
-		await interaction.reply(`Thanks for your submission to the sprint ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
+		await interaction.reply(`Thanks for your submission to the sprint ${interaction.user}!`)
 	} else {
 		await interaction.reply(`Thanks for your submission ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
 	}

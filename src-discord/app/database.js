@@ -92,6 +92,19 @@ export const getActiveSprint = async () => {
     });
 }
 
+export const getWinnerForSprint = async(sprintId) => {
+    return await WcEntry.findAll({
+        where: { sprintId },
+        attributes: ['userId', [Sequelize.fn('sum', Sequelize.col('wordCount')), 'totalWordCount']],
+        include: [ User ],
+        group: ['userId'],
+        order: [[Sequelize.literal('totalWordCount'), 'DESC']],
+        limit: 1
+      });
+      
+      return result[0]?.User;
+}
+
 export const addWordCount = async (userId, wordCount, project) => {
     await WcEntry.create({
         timestamp: Date.now(),

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getActiveSprint, getUser, Sprint } from '../../app/database.js'
+import { getActiveSprint, getUser, Sprint, getWinnerForSprint } from '../../app/database.js'
 import randomWords from 'random-words'
 
 function toPascalCase(str) {
@@ -49,14 +49,20 @@ export async function execute(interaction) {
 
     async function pencilsDown() {
         await interaction.channel.send(`${sprint.name} has ended!\nIn order to contribute to this sprint, you must submit word count with the project of \`sprint\`.\nPlease submit your word count now.`);
-        
+
         // Wait 2 minutes.
         await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
 
         sprint.ended = true
         await sprint.save()
 
-        await interaction.channel.send(`${sprint.name} has been closed for submission.`);
+        const winner = getWinnerForSprint(sprint.id)
+
+        if (winner) {
+            await interaction.channel.send(`${sprint.name} has been closed for submission.\nThe winner for this sprint is ${winner.nickname}!\nThe results for this sprint can be found here: <https://writers-crossing.com/sprints/${sprint.id}/>`);
+        } else {
+            await interaction.channel.send(`${sprint.name} has been closed for submission.`);
+        }
     }
 
     setTimeout(pencilsDown, sprintMinutes * 60 * 1000)
