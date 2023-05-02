@@ -41,7 +41,7 @@ User.hasMany(WcEntry, { foreignKey: 'userId' })
 WcEntry.belongsTo(User, { foreignKey: 'userId' })
 
 export const initialize = async () => {
-    await sequelize.sync({ force: false, alter: true })
+    await sequelize.sync({ force: false, alter: false })
     console.info('Database Ready!')
 }
 
