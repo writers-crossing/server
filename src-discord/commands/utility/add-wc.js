@@ -5,7 +5,7 @@ export const data = new SlashCommandBuilder()
 	.setName('add-wc')
 	.setDMPermission(false)
 	.setDescription('Adds word count to your total.')
-	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setRequired(true))
+	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(0).setRequired(true))
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 
 export async function execute(interaction) {
