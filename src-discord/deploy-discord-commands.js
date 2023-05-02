@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const commands = [];
 // Grab all the command files from the commands directory you created earlier
-const foldersPath = join(__dirname, 'discord', 'commands');
+const foldersPath = join(__dirname, 'commands');
 const commandFolders = readdirSync(foldersPath);
 
 for (const folder of commandFolders) {

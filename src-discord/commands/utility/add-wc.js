@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { getUser, addWordCount } from '../../app/database.js'
+import { getUser, WcEntry, recalculateUserStats, getActiveSprint } from '../../app/database.js'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
@@ -11,9 +11,46 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
 	const user = await getUser(interaction.user.id, interaction.user.username, interaction.member.displayName ?? interaction.user.username)
 	const wordCount = interaction.options.getNumber('wordcount')
-	const project = interaction.options.getString('project')
-	await addWordCount(user.id, wordCount, project)
+	let project = interaction.options.getString('project')
+	let sprintId = null
+
+	if (project && project.toLowerCase().startsWith("sprint")) {
+		// Determine if there is a sprint and count it towards that.
+		const sprint = await getActiveSprint()
+
+		if (!sprint) {
+			await interaction.reply(`There is no sprint active right now, you cannot submit time to a sprint.`);
+			return;
+		}
+
+		const now = Date.now()
+		const endTime = sprint.endTime.getTime()
+		const endTimePlus10 = endTime + 10 * 60 * 1000
+
+		if (now < endTime || now > endTimePlus10) {
+			await interaction.reply(`It's not time yet to submit yet for the active sprint, ${sprint.name}.\nPlease wait until after the sprint ends.`);
+			return;
+		}
+
+		project = null;
+		sprintId = sprint.id;
+	}
+
+	await WcEntry.create({
+		timestamp: Date.now(),
+		wordCount: wordCount,
+		project: project,
+		sprintId: sprintId,
+		userId: user.id
+	})
+
+	await recalculateUserStats(user.id)
 
 	await user.reload()
-	await interaction.reply(`Thanks for your submission ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
+
+	if (sprintId) {
+		await interaction.reply(`Thanks for your submission to the sprint ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
+	} else {
+		await interaction.reply(`Thanks for your submission ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
+	}
 }

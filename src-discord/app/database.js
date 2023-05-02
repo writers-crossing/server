@@ -25,6 +25,20 @@ export const User = sequelize.define('Users', {
     wcTotal: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false }
 })
 
+export const Sprint = sequelize.define('Sprints', {
+    id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+        primaryKey: true
+    },
+    name: { type: DataTypes.STRING, allowNull: false },
+    length: { type: DataTypes.NUMBER, allowNull: false },
+    startTime: { type: DataTypes.DATE, allowNull: false },
+    endTime: { type: DataTypes.DATE, allowNull: false },
+    ended: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
+})
+
 export const WcEntry = sequelize.define('WcEntries', {
     id: {
         type: DataTypes.UUID,
@@ -39,6 +53,12 @@ export const WcEntry = sequelize.define('WcEntries', {
 
 User.hasMany(WcEntry, { foreignKey: 'userId' })
 WcEntry.belongsTo(User, { foreignKey: 'userId' })
+
+User.hasMany(Sprint, { foreignKey: 'createdBy' })
+Sprint.belongsTo(User, { foreignKey: 'createdBy' })
+
+Sprint.hasMany(WcEntry, { foreignKey: 'sprintId' })
+WcEntry.belongsTo(Sprint, { foreignKey: 'sprintId' })
 
 export const initialize = async () => {
     await sequelize.sync({ force: false, alter: false })
@@ -62,6 +82,14 @@ export const getUser = async (discordId, discordUsername, nickname) => {
     }
 
     return user
+}
+
+export const getActiveSprint = async () => {
+    return await Sprint.findOne({
+      where: {
+        ended: false
+      }
+    });
 }
 
 export const addWordCount = async (userId, wordCount, project) => {
