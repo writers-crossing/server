@@ -93,7 +93,7 @@ export const getActiveSprint = async () => {
 }
 
 export const getWinnerForSprint = async(sprintId) => {
-    return await WcEntry.findAll({
+    const result = await WcEntry.findAll({
         where: { sprintId },
         attributes: ['userId', [Sequelize.fn('sum', Sequelize.col('wordCount')), 'totalWordCount']],
         include: [ User ],
