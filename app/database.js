@@ -1,8 +1,20 @@
+import logger from './logger.js'
 import { Sequelize, DataTypes } from 'sequelize'
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: './../data/database.sqlite'
+    storage: './../data/database.sqlite',
+    logging: (msg) => {
+        if (msg.startsWith('Executing')) {
+            logger.debug(msg);
+        } else if (msg.startsWith('Executed')) {
+            logger.info(msg);
+        } else if (msg.startsWith('Error')) {
+            logger.error(msg);
+        } else {
+            logger.verbose(msg);
+        }
+    }
 })
 
 export const User = sequelize.define('Users', {
@@ -57,12 +69,21 @@ WcEntry.belongsTo(User, { foreignKey: 'userId' })
 User.hasMany(Sprint, { foreignKey: 'createdBy' })
 Sprint.belongsTo(User, { foreignKey: 'createdBy' })
 
+User.hasMany(Sprint, { foreignKey: 'winner' })
+Sprint.belongsTo(User, { foreignKey: 'winner' })
+
 Sprint.hasMany(WcEntry, { foreignKey: 'sprintId' })
 WcEntry.belongsTo(Sprint, { foreignKey: 'sprintId' })
 
 export const initialize = async () => {
     await sequelize.sync({ force: false, alter: false })
-    console.info('Database Ready!')
+
+    const resetSprints = await Sprint.update({ ended: true }, { where: {} })
+    if (resetSprints > 0) {
+        logger.warn(`Cleared ${resetSprints} sprints that were terminated midway.`)
+    }
+
+    logger.info('Database Ready!')
 }
 
 export const getUser = async (discordId, discordUsername, nickname) => {
@@ -86,23 +107,23 @@ export const getUser = async (discordId, discordUsername, nickname) => {
 
 export const getActiveSprint = async () => {
     return await Sprint.findOne({
-      where: {
-        ended: false
-      }
+        where: {
+            ended: false
+        }
     });
 }
 
-export const getWinnerForSprint = async(sprintId) => {
+export const calculateWinnerForSprint = async (sprintId) => {
     const result = await WcEntry.findAll({
         where: { sprintId },
         attributes: ['userId', [Sequelize.fn('sum', Sequelize.col('wordCount')), 'totalWordCount']],
-        include: [ User ],
+        include: [User],
         group: ['userId'],
         order: [[Sequelize.literal('totalWordCount'), 'DESC']],
         limit: 1
-      });
-      
-      return result[0]?.User;
+    });
+
+    return result[0]?.User;
 }
 
 export const addWordCount = async (userId, wordCount, project) => {

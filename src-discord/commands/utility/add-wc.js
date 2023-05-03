@@ -1,11 +1,12 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder } from 'discord.js'
+import { formatWc } from '../../app/business.js'
 import { getUser, WcEntry, recalculateUserStats, getActiveSprint } from '../../app/database.js'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
 	.setDMPermission(false)
 	.setDescription('Adds word count to your total.')
-	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(0).setRequired(true))
+	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(0).setMaxValue(50000).setRequired(true))
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 
 export async function execute(interaction) {
@@ -19,7 +20,7 @@ export async function execute(interaction) {
 		const sprint = await getActiveSprint()
 
 		if (!sprint) {
-			await interaction.reply(`There is no sprint active right now, you cannot submit time to a sprint.`);
+			await interaction.reply(`There is no sprint active right now, you cannot submit WC to a sprint.`);
 			return;
 		}
 
@@ -49,8 +50,8 @@ export async function execute(interaction) {
 	await user.reload()
 
 	if (sprintId) {
-		await interaction.reply(`Thanks for your submission to the sprint ${interaction.user}!`)
+		await interaction.reply(`Your contribution to the sprint has been recorded, ${interaction.user}!`)
 	} else {
-		await interaction.reply(`Thanks for your submission ${interaction.user}! Your total word count for the day is ${user.wcDaily}.`)
+		await interaction.reply(`Thanks for your contribution ${interaction.user}!\nYour total word count for the day is ${formatWc(user.wcDaily)}.`)
 	}
 }

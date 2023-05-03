@@ -1,21 +1,8 @@
+import config from '../../../data/config.json' assert { type: "json" }
+
 import { SlashCommandBuilder } from 'discord.js';
-import { getActiveSprint, getUser, Sprint, getWinnerForSprint } from '../../app/database.js'
-import randomWords from 'random-words'
-
-function toPascalCase(str) {
-    // Replace underscores and hyphens with spaces
-    str = str.replace(/[_-]/g, ' ');
-
-    // Capitalize each word
-    str = str.replace(/\b\w/g, function (match) {
-        return match.toUpperCase();
-    });
-
-    // Remove spaces
-    str = str.replace(/\s+/g, '');
-
-    return str;
-}
+import { getActiveSprint, getUser, Sprint, calculateWinnerForSprint } from '../../app/database.js'
+import { getSprintTheme, waitMinutes } from '../../app/business.js'
 
 export const data = new SlashCommandBuilder()
     .setName('start-sprint')
@@ -25,45 +12,43 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     if (await getActiveSprint() != null) {
-        await interaction.reply(`A sprint is already going on.`)
+        await interaction.reply(`You cannot start a sprint. A sprint is already going on.`)
         return
     }
 
     const user = await getUser(interaction.user.id, interaction.user.username, interaction.member.displayName ?? interaction.user.username)
-    const sprintMinutes = interaction.options.getNumber('minutes') ?? 20
-
-    const sprintName = randomWords({ exactly: 2, formatter: (word) => toPascalCase(word), join: ' ' })
-    const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + sprintMinutes * 60000);
+    const sprintLengthMinutes = interaction.options.getNumber('minutes') ?? 20
+    const startTime = new Date(new Date() + config.sprintPrepTimeMinutes * 60 * 1000)
+    const endTime = new Date(startTime.getTime() + sprintLengthMinutes * 60 * 1000)
 
     const sprint = await Sprint.create({
-        name: sprintName,
+        name: getSprintTheme(),
         createdBy: user.id,
-        length: sprintMinutes,
+        length: sprintLengthMinutes,
         startTime: startTime,
         endTime: endTime,
         ended: false
     })
 
-    await interaction.reply(`A Sprint was started by ${interaction.user}! This sprint is called ${sprintName}.\nThis sprint will last ${sprintMinutes} minutes.`)
+    await interaction.reply(`A Sprint was started by ${interaction.user}! The sprint is called ${sprint.name}.\nThis sprint will last for ${sprintLengthMinutes} minutes.\nYou will have ${config.sprintPrepTimeMinutes} minutes before this sprint begins. Get ready!`)
+    await waitMinutes(config.sprintPrepTimeMinutes)
 
-    async function pencilsDown() {
-        await interaction.channel.send(`${sprint.name} has ended!\nIn order to contribute to this sprint, you must submit word count with the project of \`sprint\`.\nPlease submit your word count now.`);
+    await interaction.channel.send(`The sprint has started!`)
+    await waitMinutes(sprintLengthMinutes)
 
-        // Wait 2 minutes.
-        await new Promise(resolve => setTimeout(resolve, 2 * 60 * 1000));
+    await interaction.channel.send(`The sprint ${sprint.name} has ended!\nIn order to contribute to this sprint, you must submit word count with the project of \`sprint\`.\nPlease submit your word count now.`);
+    await waitMinutes(config.sprintSubmissionTimeMinutes)
 
-        sprint.ended = true
-        await sprint.save()
+    const winner = calculateWinnerForSprint(sprint.id)
 
-        const winner = getWinnerForSprint(sprint.id)
+    sprint.ended = true
+    sprint.winnerId = winner.id
 
-        if (winner) {
-            await interaction.channel.send(`${sprint.name} has been closed for submission.\nThe winner for this sprint is ${winner.nickname}!\nThe results for this sprint can be found here: <https://writers-crossing.com/sprints/${sprint.id}/>`);
-        } else {
-            await interaction.channel.send(`${sprint.name} has been closed for submission.`);
-        }
+    await sprint.save()
+
+    if (winner) {
+        await interaction.channel.send(`Sprint has been closed for submission.\nThe winner for this sprint is ${winner.nickname}!\nThe results for this sprint can be found here: <https://writers-crossing.com/sprints/${sprint.id}/>`);
+    } else {
+        await interaction.channel.send(`Sprint has been closed for submission.`);
     }
-
-    setTimeout(pencilsDown, sprintMinutes * 60 * 1000)
 }
