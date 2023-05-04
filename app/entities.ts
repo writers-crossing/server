@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from './sequelize'
 import { writeFileSync } from 'node:fs'
-import fetch from 'node-fetch'
+import axios from 'axios'
 import logger from './logger'
 
 export class User extends Model {
@@ -48,14 +48,8 @@ User.init(
 
 export async function downloadUserAvatar(user: User) {
     if (user.discordAvatar) {
-        const response = await fetch(`https://cdn.discordapp.com/avatars/${user.discordId}/${user.discordAvatar}.png`)
-        if (!response.ok) {
-            throw new Error(`Failed to fetch avatar for user ${user.id}: ${response.status} ${response.statusText}`)
-        }
-
-        const buffer = await response.arrayBuffer()
-        const view = new Uint8Array(buffer)
-        const bufferWrite = Buffer.from(view)
+        const response = await axios.get(`https://cdn.discordapp.com/avatars/${user.discordId}/${user.discordAvatar}.png`, { responseType: 'arraybuffer' })
+        const bufferWrite = Buffer.from(response.data)
         
         writeFileSync(`../data/avatars/${user.id}.png`, bufferWrite)
         logger.info(`Downloaded ${user.name}'s avatar to local filesystem.`)
