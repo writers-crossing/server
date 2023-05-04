@@ -39,7 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     logger.info(`A sprint (${sprint.id}) was started by ${interaction.user}.`)
 
-    await interaction.reply(`A sprint was started by ${interaction.user}! This sprint will last for ${sprintLengthMinutes} minutes.\nYou will have ${config.sprintPrepTimeMinutes} minutes before this sprint begins.\nGet ready!`)
+    await interaction.reply(`A sprint was started by ${interaction.user}! This sprint will last for ${sprintLengthMinutes} minute(s).\nYou will have ${config.sprintPrepTimeMinutes} minute(s) before this sprint begins.\nGet ready!`)
     await waitMinutes(config.sprintPrepTimeMinutes)
 
     await interaction.channel.send(`The sprint has started!`)

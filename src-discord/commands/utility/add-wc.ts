@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
-import { Sprint, WcEntry } from '../../app/entities'
+import { WcEntry } from '../../app/entities'
 import { getEntityUserFromDiscordUser, recalculateUserStats, getActiveSprint } from '../../app/database'
 import logger from '../../app/logger'
 
