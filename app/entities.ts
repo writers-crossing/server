@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from './sequelize'
 import { writeFileSync } from 'node:fs'
+import fetch from 'node-fetch'
 import logger from './logger'
 
 export class User extends Model {

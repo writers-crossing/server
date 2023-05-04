@@ -1,9 +1,7 @@
 #!/bin/bash
 set -e -u -o pipefail
 
-pm2 delete wc-cron || true
-pm2 delete wc-discord || true
-pm2 delete wc-website || true
+pm2 delete 0 1 2 3 4 5 || true
 
 cd /git/server/
 git pull
