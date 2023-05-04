@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
-import { WcEntry } from '../../app/entities'
+import { Sprint, WcEntry } from '../../app/entities'
 import { getEntityUserFromDiscordUser, recalculateUserStats, getActiveSprint } from '../../app/database'
 import logger from '../../app/logger'
 
@@ -15,17 +15,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
 	const wordCount = Math.floor(interaction.options.getNumber('wordcount') ?? 0)
 	let project = interaction.options.getString('project')
-	let sprint  = await getActiveSprint()
+
+	let activeSprint  = await getActiveSprint()
+	let sprint: Sprint | null = null
 
 	if (project && project.toLowerCase().startsWith("sprint")) {
 		// Determine if there is a sprint and count it towards that.
-		if (!sprint) {
+		if (!activeSprint) {
 			await interaction.reply(`There is no sprint active right now, you cannot submit WC to a sprint.`);
 			return;
 		}
 
 		const now = Date.now()
-		const endTime = sprint.endTime.getTime()
+		const endTime = activeSprint.endTime.getTime()
 		const endTimePlus10 = endTime + 10 * 60 * 1000
 
 		if (now < endTime || now > endTimePlus10) {
@@ -34,7 +36,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		}
 
 		project = null
-		sprint = sprint
+		sprint = activeSprint
 	}
 
 	const wcEntry = await WcEntry.create({
