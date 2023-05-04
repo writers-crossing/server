@@ -9,7 +9,6 @@ declare module "discord.js" {
 }
 
 import logger from './app/logger'
-import { initialize as database_initialize } from './app/database'
 
 // Require the necessary discord.js classes
 import { Client, Events, GatewayIntentBits, Collection } from 'discord.js'
@@ -71,8 +70,6 @@ import config from '../data/config.json'
     client.once(Events.ClientReady, c => {
         logger.info(`Discord Ready! Logged in as ${c.user.tag}`)
     })
-
-    await database_initialize()
 
     client.login(config.discordToken)
 })()

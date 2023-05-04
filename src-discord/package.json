@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "ts-node index.ts",
+    "initialize": "ts-node initialize.ts",
     "deploy-discord-commands": "ts-node deploy-discord-commands.ts"
   },
   "author": "",
