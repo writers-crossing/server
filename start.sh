@@ -7,23 +7,17 @@ pm2 flush || true
 cd /git/server/
 git pull
 
-cd /git/server/app/
-npm install
-
-cd /git/server/src-cron/
-rm app.log || true
-rm app-error.log || true
-npm install
-pm2 start npm --name wc-cron -- start
-
 cd /git/server/src-discord/
 rm app.log || true
 rm app-error.log || true
-npm install
 pm2 start npm --name wc-discord -- start
 
 cd /git/server/src-website/
 rm app.log || true
 rm app-error.log || true
-npm install
 pm2 start npm --name wc-website -- start
+
+cd /git/server/src-cron/
+rm app.log || true
+rm app-error.log || true
+pm2 start npm --name wc-cron -- start
