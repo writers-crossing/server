@@ -37,7 +37,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		sprint = sprint
 	}
 
-	await WcEntry.create({
+	const wcEntry = await WcEntry.create({
 		timestamp: Date.now(),
 		wordCount: wordCount,
 		project: project,
@@ -50,10 +50,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	await user.reload()
 
 	if (sprint) {
-		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wordCount} words to sprint ${sprint.id}.`)
+		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words to sprint ${sprint.id}.`)
 		await interaction.reply(`Your contribution to the sprint has been recorded, ${interaction.user}!`)
 	} else {
-		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wordCount} words.`)
+		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words.`)
 		await interaction.reply(`Thanks for your contribution ${interaction.user}!\nYour total word count for the day is ${formatWc(user.wcDaily)}.`)
 	}
 }

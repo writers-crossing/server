@@ -146,16 +146,19 @@ export const getMonthLeaderboard = async (limit = 10) => {
             'wcMonthly',
             [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcMonthly DESC)'), 'rowNumber']
         ],
+        where: {
+            isHidden: false
+        },
         order: [['wcMonthly', 'DESC']],
         limit,
         mapToModel: true
     })
 
     return users.map(user => ({
+        rowNumber: user.get('rowNumber'),
         id: user.id,
         discordUsername: user.discordUsername,
-        wcMonthly: user.wcMonthly,
-        rowNumber: user.get('rowNumber')
+        count: user.wcMonthly
     }))
 }
 
@@ -167,6 +170,9 @@ export const getAllTimeLeaderboard = async (limit = 10) => {
             'wcTotal',
             [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcTotal DESC)'), 'rowNumber']
         ],
+        where: {
+            isHidden: false
+        },
         order: [['wcTotal', 'DESC']],
         limit,
         mapToModel: true
@@ -176,6 +182,6 @@ export const getAllTimeLeaderboard = async (limit = 10) => {
         rowNumber: user.get('rowNumber'),
         id: user.id,
         discordUsername: user.discordUsername,
-        wcTotal: user.wcTotal
+        count: user.wcTotal
     }))
 }

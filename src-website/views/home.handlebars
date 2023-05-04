@@ -41,9 +41,8 @@
                     {{#each monthlyLeaderboardUsers}}
                     <tr>
                         <td>{{ rowNumber }}</td>
-                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{
-                                discordUsername }}</a></td>
-                        <td>{{ wcMonthly }} words</td>
+                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{ discordUsername }}</a></td>
+                        <td>{{ count }} words</td>
                     </tr>
                     {{/each}}
                 </tbody>
@@ -70,9 +69,8 @@
                     {{#each allTimeLeaderboardUsers}}
                     <tr>
                         <td>{{ rowNumber }}</td>
-                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{
-                                discordUsername }}</a></td>
-                        <td>{{ wcMonthly }} words</td>
+                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{ discordUsername }}</a></td>
+                        <td>{{ count }} words</td>
                     </tr>
                     {{/each}}
                 </tbody>

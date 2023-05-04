@@ -32,14 +32,14 @@ app.get('/', async (_, res) => {
 
 app.get('/users/:id', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
-  if (!user) { return next() }
+  if (!user || user?.isHidden) { return next() }
 
   return res.render('user', { title: `${user.name}'s Profile`, user: user })
 })
 
 app.get('/users/:id/avatar.png', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
-  if (!user) { return next() }
+  if (!user || user?.isHidden) { return next() }
 
   if (!user.discordAvatar) return res.sendFile(path.join(__dirname, '../assets/default-avatar.png'))
   else return res.sendFile(path.join(__dirname, `../data/avatars/${user.id}.png`))

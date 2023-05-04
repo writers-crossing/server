@@ -24,7 +24,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     }
 
     const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.username)
-    const sprintLengthMinutes = interaction.options.getNumber('minutes') ?? 20
+    const sprintLengthMinutes = Math.floor(interaction.options.getNumber('minutes') ?? 20)
     const startTime = new Date(Date.now() + config.sprintPrepTimeMinutes * 60 * 1000)
     const endTime = new Date(startTime.getTime() + sprintLengthMinutes * 60 * 1000)
 
