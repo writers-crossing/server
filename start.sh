@@ -2,6 +2,7 @@
 set -e -u -o pipefail
 
 pm2 delete 0 1 2 3 4 5 || true
+pm2 flush || true
 
 cd /git/server/
 git pull
