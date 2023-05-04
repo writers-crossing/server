@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
-	const wordCount = interaction.options.getNumber('wordcount')
+	const wordCount = Math.floor(interaction.options.getNumber('wordcount') ?? 0)
 	let project = interaction.options.getString('project')
 	let sprint  = await getActiveSprint()
 
