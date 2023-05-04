@@ -1,6 +1,6 @@
 import logger from './app/logger'
 
-import express from 'express'
+import express, { NextFunction } from 'express'
 import { Request, Response } from 'express'
 import Handlebars from 'handlebars'
 import { engine } from 'express-handlebars'
@@ -55,7 +55,7 @@ app.use((req, res) => {
 })
 
 // Error Handler
-app.use((err: Error, req: Request, res: Response) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   logger.error(err)
 
   res.status(500)
