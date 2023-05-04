@@ -25,9 +25,10 @@
 
 <div class="row align-items-md-stretch">
     <div class="col-md-6">
-        <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+        <div class="h-100 p-4 bg-body-tertiary border rounded-3">
             <h2>{{ month }} Leaderboard</h2>
 
+            {{#if monthlyLeaderboardUsers }}
             <table class="table">
                 <thead>
                     <tr>
@@ -40,36 +41,45 @@
                     {{#each monthlyLeaderboardUsers}}
                     <tr>
                         <td>{{ rowNumber }}</td>
-                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{ discordUsername }}</a></td>
+                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{
+                                discordUsername }}</a></td>
                         <td>{{ wcMonthly }} words</td>
                     </tr>
                     {{/each}}
                 </tbody>
             </table>
+            {{else}}
+            <p>No users have submitted yet for this month.</p>
+            {{/if}}
         </div>
     </div>
     <div class="col-md-6">
-        <div class="h-100 p-5 bg-body-tertiary border rounded-3">
+        <div class="h-100 p-4 bg-body-tertiary border rounded-3">
             <h2>All Time Leaderboard</h2>
 
+            {{#if allTimeLeaderboardUsers }}
             <table class="table">
                 <thead>
                     <tr>
-                        <th class="tg-0pky">Ranking</th>
-                        <th class="tg-0pky">User</th>
-                        <th class="tg-0pky">Word Count</th>
+                        <th>Ranking</th>
+                        <th>User</th>
+                        <th>Word Count</th>
                     </tr>
                 </thead>
                 <tbody>
                     {{#each allTimeLeaderboardUsers}}
                     <tr>
                         <td>{{ rowNumber }}</td>
-                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{ discordUsername }}</a></td>
-                        <td>{{ wcTotal }} words</td>
+                        <td><img class="avatar-tiny" src="/users/{{ id }}/avatar.png"> <a href="/users/{{ id }}/">{{
+                                discordUsername }}</a></td>
+                        <td>{{ wcMonthly }} words</td>
                     </tr>
                     {{/each}}
                 </tbody>
             </table>
+            {{else}}
+            <p>No users have submitted yet this year.</p>
+            {{/if}}
         </div>
     </div>
 </div>

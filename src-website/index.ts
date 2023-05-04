@@ -2,7 +2,10 @@ import logger from './app/logger'
 
 import express from 'express'
 import { Request, Response } from 'express'
+import Handlebars from 'handlebars'
 import { engine } from 'express-handlebars'
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access'
+import path from 'node:path'
 
 import config from '../data/config.json'
 import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard } from './app/database'
@@ -11,7 +14,9 @@ import { getMonthName } from './app/business'
 const app = express()
 const port = config.expressPort
 
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({
+  handlebars: allowInsecurePrototypeAccess(Handlebars)
+}))
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
@@ -29,14 +34,15 @@ app.get('/users/:id', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
   if (!user) { return next() }
 
-  return res.render('user')
+  return res.render('user', { title: `${user.name}'s Profile`, user: user })
 })
 
 app.get('/users/:id/avatar.png', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
   if (!user) { return next() }
 
-  return res.redirect(user.discordAvatarUrl)
+  if (!user.discordAvatar) return res.sendFile(path.join(__dirname, '../assets/default-avatar.png'))
+  else return res.sendFile(path.join(__dirname, `../data/avatars/${user.id}.png`))
 })
 
 // Custom 404 Middleware

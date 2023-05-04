@@ -15,6 +15,10 @@ export const initialize = async () => {
     logger.info('Database Ready!')
 }
 
+export const getEntityUserByDiscordId = async (x: string) => {
+    return await User.findOne({ where: { discordId: x } })
+}
+
 export const getEntityUserByAny = async (x: string) => {
     return await User.findOne({
         where: {
@@ -27,23 +31,23 @@ export const getEntityUserByAny = async (x: string) => {
     })
 }
 
-export const getEntityUserFromDiscordUser = async (discordId: string, discordUsername: string, discordAvatarUrl: string) => {
+export const getEntityUserFromDiscordUser = async (discordId: string, discordUsername: string, discordAvatar: string | null) => {
     let user = await User.findOne({ where: { discordId: discordId } })
 
-    if (user) {
-        user = await user.update({
-            discordUsername: discordUsername,
-            discordAvatarUrl: discordAvatarUrl
-        })
-    } else {
-        user = await User.create({
+    if (user == null) {
+        return await User.create({
+            name: discordUsername,
             discordId: discordId,
             discordUsername: discordUsername,
-            discordAvatarUrl: discordAvatarUrl
+            discordAvatar: discordAvatar
+        })
+    } else {
+        return await user.update({
+            name: discordUsername,
+            discordUsername: discordUsername,
+            discordAvatar: discordAvatar
         })
     }
-
-    return user
 }
 
 export const getActiveSprint = async () => {

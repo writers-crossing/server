@@ -1,6 +1,7 @@
 config.json
 *.sqlite
 *.sqlite-journal
+data/avatars/*.png
 
 # Logs
 logs

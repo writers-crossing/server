@@ -14,7 +14,7 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (await getActiveSprint() != null) {
-        await interaction.reply(`You cannot start a sprint. A sprint is already going on.`)
+        await interaction.reply(`You cannot start a sprint. A sprint is already active.`)
         return
     }
 

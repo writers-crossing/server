@@ -9,10 +9,10 @@ export function toPascalCase(str: string) {
 
 export function getMonthName(date: Date) {
     const months = ["January", "February", "March",
-                    "April", "May", "June", "July",
-                    "August", "September", "October",
-                    "November", "December"]
-    
+        "April", "May", "June", "July",
+        "August", "September", "October",
+        "November", "December"]
+
     return months[date.getMonth()];
 }
 
@@ -41,5 +41,5 @@ export async function waitMinutes(x: number) {
 
     return new Promise(resolve => {
         setTimeout(resolve, milliseconds);
-    });
+    })
 }

@@ -1,11 +1,14 @@
 import { DataTypes, Model } from 'sequelize'
 import sequelize from './sequelize'
+import { writeFileSync } from 'node:fs'
+import logger from './logger'
 
 export class User extends Model {
     public id!: string
+    public name!: string
     public discordId!: string
     public discordUsername!: string
-    public discordAvatarUrl!: string
+    public discordAvatar!: string
     public wcDaily!: number
     public wcMonthly!: number
     public wcYearly!: number
@@ -23,13 +26,14 @@ User.init(
             allowNull: false,
             primaryKey: true,
         },
+        name: { type: DataTypes.STRING, allowNull: false },
         discordId: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
         discordUsername: { type: DataTypes.STRING, allowNull: false },
-        discordAvatarUrl: { type: DataTypes.STRING, allowNull: false },
+        discordAvatar: { type: DataTypes.STRING, allowNull: true },
         wcDaily: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcMonthly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
@@ -40,6 +44,29 @@ User.init(
         modelName: 'Users',
     }
 )
+
+export async function downloadUserAvatar(user: User) {
+    if (user.discordAvatar) {
+        const response = await fetch(`https://cdn.discordapp.com/avatars/${user.discordId}/${user.discordAvatar}.png`)
+        if (!response.ok) {
+            throw new Error(`Failed to fetch avatar for user ${user.id}: ${response.status} ${response.statusText}`)
+        }
+
+        const buffer = await response.arrayBuffer()
+        const view = new Uint8Array(buffer)
+        const bufferWrite = Buffer.from(view)
+        
+        writeFileSync(`../data/avatars/${user.id}.png`, bufferWrite)
+        logger.info(`Downloaded ${user.name}'s avatar to local filesystem.`)
+    }
+}
+
+User.afterCreate(async (user) => {
+    if (user.discordAvatar) await downloadUserAvatar(user)
+})
+User.afterUpdate(async (user) => {
+    if (user.changed('discordAvatar')) await downloadUserAvatar(user);
+})
 
 export class Sprint extends Model {
     public id!: string
