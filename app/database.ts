@@ -15,19 +15,31 @@ export const initialize = async () => {
     logger.info('Database Ready!')
 }
 
-export const getEntityUserFromDiscordUser = async (discordId: string, discordUsername: string, discordAvatarHash: string | null) => {
+export const getEntityUserByAny = async (x: string) => {
+    return await User.findOne({
+        where: {
+            [Op.or]: [
+                { id: x },
+                { discordId: x },
+                { discordUsername: x }
+            ]
+        }
+    })
+}
+
+export const getEntityUserFromDiscordUser = async (discordId: string, discordUsername: string, discordAvatarUrl: string) => {
     let user = await User.findOne({ where: { discordId: discordId } })
 
     if (user) {
         user = await user.update({
             discordUsername: discordUsername,
-            discordAvatarHash: discordAvatarHash
+            discordAvatarUrl: discordAvatarUrl
         })
     } else {
         user = await User.create({
             discordId: discordId,
             discordUsername: discordUsername,
-            discordAvatarHash: discordAvatarHash
+            discordAvatarUrl: discordAvatarUrl
         })
     }
 
@@ -120,4 +132,46 @@ export const recalculateUserStats = async (userId: string) => {
         wcYearly: wcYearly,
         wcTotal: wcTotal
     })
+}
+
+export const getMonthLeaderboard = async (limit = 10) => {
+    const users = await User.findAll({
+        attributes: [
+            'id',
+            'discordUsername',
+            'wcMonthly',
+            [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcMonthly DESC)'), 'rowNumber']
+        ],
+        order: [['wcMonthly', 'DESC']],
+        limit,
+        mapToModel: true
+    })
+
+    return users.map(user => ({
+        id: user.id,
+        discordUsername: user.discordUsername,
+        wcMonthly: user.wcMonthly,
+        rowNumber: user.get('rowNumber')
+    }))
+}
+
+export const getAllTimeLeaderboard = async (limit = 10) => {
+    const users = await User.findAll({
+        attributes: [
+            'id',
+            'discordUsername',
+            'wcTotal',
+            [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcTotal DESC)'), 'rowNumber']
+        ],
+        order: [['wcTotal', 'DESC']],
+        limit,
+        mapToModel: true
+    })
+
+    return users.map(user => ({
+        rowNumber: user.get('rowNumber'),
+        id: user.id,
+        discordUsername: user.discordUsername,
+        wcTotal: user.wcTotal
+    }))
 }

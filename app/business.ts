@@ -7,6 +7,15 @@ export function toPascalCase(str: string) {
         .join(" ");
 }
 
+export function getMonthName(date: Date) {
+    const months = ["January", "February", "March",
+                    "April", "May", "June", "July",
+                    "August", "September", "October",
+                    "November", "December"]
+    
+    return months[date.getMonth()];
+}
+
 export function getSprintTheme() {
     return toPascalCase(`${faker.word.adjective()} ${faker.animal.type()}`)
 }

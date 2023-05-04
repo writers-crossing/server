@@ -16,4 +16,4 @@ pm2 start npm --name wc-discord -- start
 
 cd /git/server/src-website/
 npm install
-pm2 start npm --name wc-discord -- start
+pm2 start npm --name wc-website -- start

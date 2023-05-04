@@ -29,7 +29,7 @@ User.init(
             unique: true,
         },
         discordUsername: { type: DataTypes.STRING, allowNull: false },
-        discordAvatarHash: { type: DataTypes.STRING, allowNull: true },
+        discordAvatarUrl: { type: DataTypes.STRING, allowNull: false },
         wcDaily: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcMonthly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },

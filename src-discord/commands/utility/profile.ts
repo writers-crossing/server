@@ -7,7 +7,7 @@ export const data = new SlashCommandBuilder()
     .setDescription('Get a link to your Writer\'s Crossing profile.')
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
+	const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatarURL() ?? interaction.user.defaultAvatarURL)
 
     await interaction.reply({
         content: `Your profile is located at <${config.baseUrl}/users/${user.id}>`,
