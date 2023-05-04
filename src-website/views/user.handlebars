@@ -5,11 +5,11 @@
         <h3>{{ user.name }}</h3>
     </div>
     <div class="col">
-        <div class="d-flex justify-content-between gap-3">
+        <div class="d-flex justify-content-around gap-3">
             <!-- Monthly -->
             <div class="card text-center mb-3" style="width: 18rem;">
                 <div class="card-body">
-                    <p class="card-text">{{ user.wcMonthly }}</p>
+                    <p class="card-text fs-1">{{ formatWc user.wcMonthly }}</p>
                     <h5 class="card-title">Monthly Word Count</h5>
                 </div>
             </div>
@@ -17,7 +17,7 @@
             <!-- Yearly -->
             <div class="card text-center mb-3" style="width: 18rem;">
                 <div class="card-body">
-                    <p class="card-text">{{ user.wcYearly }}</p>
+                    <p class="card-text fs-1">{{ formatWc user.wcYearly }}</p>
                     <h5 class="card-title">Yearly Word Count</h5>
                 </div>
             </div>
@@ -25,10 +25,40 @@
             <!-- Total -->
             <div class="card text-center mb-3" style="width: 18rem;">
                 <div class="card-body">
-                    <p class="card-text">{{ user.wcTotal }}</p>
+                    <p class="card-text fs-1">{{ formatWc user.wcTotal }}</p>
                     <h5 class="card-title">Total Word Count</h5>
                 </div>
             </div>
         </div>
+
+        <!--
+        <div class="mt-3">
+            {{#if entries}}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ranking</th>
+                        <th>User</th>
+                        <th>Word Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each monthlyLeaderboardUsers}}
+                    <tr>
+                        <td>{{ rowNumber }}</td>
+                        <td>
+                            <img class="avatar-tiny" src="/users/{{ id }}/avatar.png" />
+                            <a href="/users/{{ id }}/">{{ name }}</a>
+                        </td>
+                        <td>{{ formatWc count }} words</td>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+            {{else}}
+            <p class="text-center">This user has not submitted any entries.</p>
+            {{/if}}
+        </div>
+        -->
     </div>
 </div>

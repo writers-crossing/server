@@ -71,6 +71,7 @@ User.afterUpdate(async (user) => {
 
 export class Sprint extends Model {
     public id!: string
+    public name!: string
     public length!: number
     public startTime!: Date
     public endTime!: Date
@@ -90,6 +91,7 @@ Sprint.init(
             allowNull: false,
             primaryKey: true,
         },
+        name: { type: DataTypes.STRING, allowNull: false },
         length: { type: DataTypes.NUMBER, allowNull: false },
         startTime: { type: DataTypes.DATE, allowNull: false },
         endTime: { type: DataTypes.DATE, allowNull: false },
@@ -110,7 +112,9 @@ export class WcEntry extends Model {
     public readonly createdAt!: Date
     public readonly updatedAt!: Date
 
-    public readonly User!: User
+    // References
+    public readonly user!: User
+    public readonly sprint?: Sprint
 }
 
 WcEntry.init(

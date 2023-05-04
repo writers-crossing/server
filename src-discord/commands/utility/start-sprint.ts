@@ -2,7 +2,7 @@ import config from '../../../data/config.json'
 
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { Sprint } from '../../app/entities'
-import { getActiveSprint, getEntityUserFromDiscordUser, calculateWinnerForSprint } from '../../app/database'
+import { getActiveSprint, getEntityUserFromDiscordUser, getSprintLeaderboard, getSprintWinner } from '../../app/database'
 import { getSprintTheme, waitMinutes } from '../../app/business'
 import logger from '../../app/logger'
 
@@ -23,7 +23,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return
     }
 
-    const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.username)
+    const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
     const sprintLengthMinutes = Math.floor(interaction.options.getNumber('minutes') ?? 20)
     const startTime = new Date(Date.now() + config.sprintPrepTimeMinutes * 60 * 1000)
     const endTime = new Date(startTime.getTime() + sprintLengthMinutes * 60 * 1000)
@@ -48,7 +48,8 @@ export async function execute(interaction: ChatInputCommandInteraction) {
     await interaction.channel.send(`The sprint has ended!\nIn order to contribute to this sprint, you must submit word count with the project of \`sprint\`.\nPlease submit your word count now.`);
     await waitMinutes(config.sprintSubmissionTimeMinutes)
 
-    const winner = await calculateWinnerForSprint(sprint.id)
+    const leaderboard = await getSprintLeaderboard(sprint.id)
+    const winner = await getSprintWinner(sprint.id)
 
     sprint.ended = true
     sprint.winnerId = winner?.id
@@ -61,5 +62,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         await interaction.channel.send(`Sprint has been closed for submission.`);
     }
 
-    logger.info(`Sprint ${sprint.id} has completed.`)
+    logger.info(`Sprint ${sprint.id} has completed, returned ${leaderboard.length} rows.`)
 }

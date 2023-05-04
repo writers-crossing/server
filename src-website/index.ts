@@ -8,20 +8,25 @@ import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access
 import path from 'node:path'
 
 import config from '../data/config.json'
-import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard } from './app/database'
-import { getMonthName } from './app/business'
+import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard } from './app/database'
+import { formatWc, getMonthName } from './app/business'
+import { Sprint } from './app/entities'
 
 const app = express()
 const port = config.expressPort
 
 app.engine('handlebars', engine({
-  handlebars: allowInsecurePrototypeAccess(Handlebars)
+  handlebars: allowInsecurePrototypeAccess(Handlebars),
+  helpers: {
+    formatWc: (wc: any) => { return formatWc(parseInt(wc)) }
+  }
 }))
 app.set('view engine', 'handlebars');
 app.set('views', './views');
 
 app.use(express.static('public'))
 
+// Homepage
 app.get('/', async (_, res) => {
   return res.render('home', {
     month: getMonthName(new Date()),
@@ -30,6 +35,7 @@ app.get('/', async (_, res) => {
   })
 })
 
+// Users
 app.get('/users/:id', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
   if (!user || user?.isHidden) { return next() }
@@ -43,6 +49,16 @@ app.get('/users/:id/avatar.png', async (req, res, next) => {
 
   if (!user.discordAvatar) return res.sendFile(path.join(__dirname, '../assets/default-avatar.png'))
   else return res.sendFile(path.join(__dirname, `../data/avatars/${user.id}.png`))
+})
+
+// Sprints
+app.get('/sprints/:id', async (req, res, next) => {
+  let sprint = await Sprint.findOne({ where: { id: req.params.id } })
+  if (!sprint) { return next() }
+
+  let sprintLeaderboard = await getSprintLeaderboard(sprint.id)
+
+  return res.render('sprint', { title: `Sprint ${sprint.name}`, sprint: sprint, sprintLeaderboard: sprintLeaderboard })
 })
 
 // Custom 404 Middleware

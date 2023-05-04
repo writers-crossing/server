@@ -2,7 +2,7 @@ import logger from './logger'
 import sequelize from './sequelize'
 import { Sprint, WcEntry, User } from './entities'
 
-import { Sequelize, Op } from 'sequelize'
+import { Sequelize, Op, QueryTypes } from 'sequelize'
 
 export const initialize = async () => {
     await sequelize.sync({ force: false, alter: false })
@@ -56,19 +56,6 @@ export const getActiveSprint = async () => {
             ended: false
         }
     })
-}
-
-export const calculateWinnerForSprint = async (sprintId: string) => {
-    const result = await WcEntry.findOne({
-        where: { sprintId },
-        attributes: ['userId', [Sequelize.fn('sum', Sequelize.col('wordCount')), 'totalWordCount']],
-        include: [User],
-        group: ['userId'],
-        order: [[Sequelize.literal('totalWordCount'), 'DESC']],
-        limit: 1
-    })
-
-    return result?.User
 }
 
 export const addWordCount = async (userId: string, wordCount: number, project: string) => {
@@ -138,11 +125,40 @@ export const recalculateUserStats = async (userId: string) => {
     })
 }
 
+export const getSprintWinner = async (sprintId: string) => {
+    let winnerLeaderboard = await getSprintLeaderboard(sprintId, 1)
+    let winnerUserId = (winnerLeaderboard[0] as any)['user_id'] as string | null
+
+    if (winnerUserId) {
+        return await User.findOne({ where: { id: winnerUserId }})
+    }
+
+    return null
+}
+
+export const getSprintLeaderboard = async (sprintId: string, limit = 99) => {
+    return await sequelize.query(`
+        SELECT ROW_NUMBER() OVER (ORDER BY SUM(wordCount) DESC) AS rowNumber,
+            Users.id AS user_id,
+            Users.name AS user_name,
+            SUM(wordCount) AS count
+        FROM WcEntries
+        INNER JOIN Users ON WcEntries.userId = Users.id
+        WHERE sprintId = ?
+        GROUP BY userId
+        ORDER BY count DESC
+        LIMIT ?;
+    `, {
+        replacements: [ sprintId, limit ],
+        type: QueryTypes.SELECT
+    })
+}
+
 export const getMonthLeaderboard = async (limit = 10) => {
     const users = await User.findAll({
         attributes: [
             'id',
-            'discordUsername',
+            'name',
             'wcMonthly',
             [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcMonthly DESC)'), 'rowNumber']
         ],
@@ -150,14 +166,13 @@ export const getMonthLeaderboard = async (limit = 10) => {
             isHidden: false
         },
         order: [['wcMonthly', 'DESC']],
-        limit,
-        mapToModel: true
+        limit
     })
 
     return users.map(user => ({
         rowNumber: user.get('rowNumber'),
         id: user.id,
-        discordUsername: user.discordUsername,
+        name: user.name,
         count: user.wcMonthly
     }))
 }
@@ -166,7 +181,7 @@ export const getAllTimeLeaderboard = async (limit = 10) => {
     const users = await User.findAll({
         attributes: [
             'id',
-            'discordUsername',
+            'name',
             'wcTotal',
             [sequelize.literal('ROW_NUMBER() OVER (ORDER BY wcTotal DESC)'), 'rowNumber']
         ],
@@ -174,14 +189,13 @@ export const getAllTimeLeaderboard = async (limit = 10) => {
             isHidden: false
         },
         order: [['wcTotal', 'DESC']],
-        limit,
-        mapToModel: true
+        limit
     })
 
     return users.map(user => ({
         rowNumber: user.get('rowNumber'),
         id: user.id,
-        discordUsername: user.discordUsername,
+        name: user.name,
         count: user.wcTotal
     }))
 }
