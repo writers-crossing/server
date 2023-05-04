@@ -1,6 +1,8 @@
-import { SlashCommandBuilder } from 'discord.js'
-import { formatWc } from '../../app/business.js'
-import { getUser, WcEntry, recalculateUserStats, getActiveSprint } from '../../app/database.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { formatWc } from '../../app/business'
+import { Sprint, WcEntry } from '../../app/entities'
+import { getEntityUserFromDiscordUser, recalculateUserStats, getActiveSprint } from '../../app/database'
+import logger from '../../app/logger'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
@@ -9,16 +11,14 @@ export const data = new SlashCommandBuilder()
 	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(0).setMaxValue(50000).setRequired(true))
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 
-export async function execute(interaction) {
-	const user = await getUser(interaction.user.id, interaction.user.username, interaction.member.displayName ?? interaction.user.username)
+export async function execute(interaction: ChatInputCommandInteraction) {
+	const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
 	const wordCount = interaction.options.getNumber('wordcount')
 	let project = interaction.options.getString('project')
-	let sprintId = null
+	let sprint  = await getActiveSprint()
 
 	if (project && project.toLowerCase().startsWith("sprint")) {
 		// Determine if there is a sprint and count it towards that.
-		const sprint = await getActiveSprint()
-
 		if (!sprint) {
 			await interaction.reply(`There is no sprint active right now, you cannot submit WC to a sprint.`);
 			return;
@@ -29,19 +29,19 @@ export async function execute(interaction) {
 		const endTimePlus10 = endTime + 10 * 60 * 1000
 
 		if (now < endTime || now > endTimePlus10) {
-			await interaction.reply(`It's not time yet to submit yet for the active sprint, ${sprint.name}.\nPlease wait until after the sprint ends.`);
+			await interaction.reply(`It's not time yet to submit yet for the sprint. Please wait until after the sprint ends.`);
 			return;
 		}
 
-		project = null;
-		sprintId = sprint.id;
+		project = null
+		sprint = sprint
 	}
 
 	await WcEntry.create({
 		timestamp: Date.now(),
 		wordCount: wordCount,
 		project: project,
-		sprintId: sprintId,
+		sprintId: sprint?.id,
 		userId: user.id
 	})
 
@@ -49,9 +49,11 @@ export async function execute(interaction) {
 
 	await user.reload()
 
-	if (sprintId) {
+	if (sprint) {
+		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wordCount} words to sprint ${sprint.id}.`)
 		await interaction.reply(`Your contribution to the sprint has been recorded, ${interaction.user}!`)
 	} else {
+		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wordCount} words.`)
 		await interaction.reply(`Thanks for your contribution ${interaction.user}!\nYour total word count for the day is ${formatWc(user.wcDaily)}.`)
 	}
 }

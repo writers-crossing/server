@@ -7,10 +7,13 @@ pm2 delete wc-website || true
 cd /git/server/
 git pull
 
+cd /git/server/src-discord/app/
+npm install
+
 cd /git/server/src-discord/
 npm install
-pm2 start --name wc-discord index.js
+pm2 start npm --name wc-discord -- start
 
 cd /git/server/src-website/
 npm install
-pm2 start --name wc-website index.js
+pm2 start npm --name wc-discord -- start
