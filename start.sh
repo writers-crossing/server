@@ -21,3 +21,5 @@ cd /git/server/src-cron/
 rm app.log || true
 rm app-error.log || true
 pm2 start npm --name wc-cron -- start
+
+pm2 save

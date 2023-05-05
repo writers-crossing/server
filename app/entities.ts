@@ -10,10 +10,14 @@ export class User extends Model {
     public discordId!: string
     public discordUsername!: string
     public discordAvatar!: string
+
     public wcDaily!: number
     public wcMonthly!: number
     public wcYearly!: number
     public wcTotal!: number
+
+    public dailyGoal?: number
+    public monthlyGoal?: number
 
     public isInactive!: boolean
     public isHidden!: boolean
@@ -38,10 +42,14 @@ User.init(
         },
         discordUsername: { type: DataTypes.STRING, allowNull: false },
         discordAvatar: { type: DataTypes.STRING, allowNull: true },
+
         wcDaily: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcMonthly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcTotal: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+
+        dailyGoal: { type: DataTypes.NUMBER, allowNull: true },
+        monthlyGoal: { type: DataTypes.NUMBER, allowNull: true },
 
         isInactive: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
         isHidden: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }

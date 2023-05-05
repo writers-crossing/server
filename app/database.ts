@@ -5,7 +5,7 @@ import { Sprint, WcEntry, User } from './entities'
 import { Sequelize, Op, QueryTypes } from 'sequelize'
 
 export const initialize = async () => {
-    await sequelize.sync({ force: false, alter: false })
+    await sequelize.sync({ force: false, alter: { drop: false } })
 
     const [sprintsTerminatedAffectedCount] = await Sprint.update({ ended: true }, { where: { ended: false } })
     if (sprintsTerminatedAffectedCount > 0) {
