@@ -1,10 +1,10 @@
+import config from '../data/config.json'
+
 import cron from 'node-cron'
 import logger from './app/logger'
 import { AwardXp, User } from './app/entities'
 import { Op } from 'sequelize';
 import sequelize from './app/sequelize'
-
-const awardCalc = 0.05
 
 // Daily - WC Reset
 cron.schedule('0 0 * * *', async () => {
@@ -16,7 +16,7 @@ cron.schedule('0 0 * * *', async () => {
 
     for (const user of users) {
         if (user.dailyGoal && user.dailyGoal > 0) {
-            await AwardXp.create({ discordId: user.discordId, xp: user.dailyGoal * awardCalc })
+            await AwardXp.create({ discordId: user.discordId, xp: user.dailyGoal * config.awardXpPercentageGoal })
         }
     }
 
@@ -34,7 +34,7 @@ cron.schedule('0 0 * * 1', async () => {
 
     for (const user of users) {
         if (user.weeklyGoal && user.weeklyGoal > 0) {
-            await AwardXp.create({ discordId: user.discordId, xp: user.weeklyGoal * awardCalc })
+            await AwardXp.create({ discordId: user.discordId, xp: user.weeklyGoal * config.awardXpPercentageGoal })
         }
     }
 
@@ -52,7 +52,7 @@ cron.schedule('0 0 1 * *', async () => {
 
     for (const user of users) {
         if (user.monthlyGoal && user.monthlyGoal > 0) {
-            await AwardXp.create({ discordId: user.discordId, xp: user.monthlyGoal * 0.005 })
+            await AwardXp.create({ discordId: user.discordId, xp: user.monthlyGoal * config.awardXpPercentageGoal })
         }
     }
 
@@ -70,7 +70,7 @@ cron.schedule('59 23 31 12 *', async () => {
 
     for (const user of users) {
         if (user.yearlyGoal && user.yearlyGoal > 0) {
-            await AwardXp.create({ discordId: user.discordId, xp: user.yearlyGoal * awardCalc })
+            await AwardXp.create({ discordId: user.discordId, xp: user.yearlyGoal * config.awardXpPercentageGoal })
         }
     }
 
