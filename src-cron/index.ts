@@ -1,17 +1,8 @@
 import cron from 'node-cron'
 import logger from './app/logger'
-import { AwardXp, Sprint, User } from './app/entities'
+import { AwardXp, User } from './app/entities'
 import { Op } from 'sequelize';
-import sequelize from './app/sequelize';
-
-// Hourly - Cleanup
-cron.schedule('0 * * * *', async () => {
-    const [sprintsTerminatedAffectedCount] = await Sprint.update({ ended: true }, { where: { ended: false } })
-    
-    if (sprintsTerminatedAffectedCount > 0) {
-        logger.warn(`Cleared ${sprintsTerminatedAffectedCount} sprints that were terminated midway.`)
-    }
-})
+import sequelize from './app/sequelize'
 
 // Daily - WC Reset
 cron.schedule('0 0 * * *', async () => {

@@ -17,7 +17,7 @@ import { join } from 'node:path'
 import cron from 'node-cron'
 
 import config from '../data/config.json'
-import { AwardXp } from './app/entities'
+import { AwardXp, Sprint } from './app/entities'
 import { awardXp } from './discord-commands'
 
 (async () => {
@@ -80,7 +80,11 @@ import { awardXp } from './discord-commands'
             xp.save()
         }
     })
-    
+
+    const [sprintsTerminatedAffectedCount] = await Sprint.update({ ended: true }, { where: { ended: false } })
+    if (sprintsTerminatedAffectedCount > 0) {
+        logger.warn(`Cleared ${sprintsTerminatedAffectedCount} sprints that were terminated midway.`)
+    }
 
     client.once(Events.ClientReady, c => {
         logger.info(`Discord Ready! Logged in as ${c.user.tag}`)
