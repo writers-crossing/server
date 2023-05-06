@@ -4,6 +4,36 @@ import { writeFileSync } from 'node:fs'
 import axios from 'axios'
 import logger from './logger'
 
+export class GoalAudit extends Model {
+    public id!: string
+    public type!: string
+    public userId!: string
+    public goal!: number
+    public actual!: number
+    public awardedXp?: number
+    public metGoal!: boolean
+}
+
+GoalAudit.init(
+    {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            allowNull: false,
+            primaryKey: true,
+        },
+        type: { type: DataTypes.STRING, allowNull: false },
+        goal: { type: DataTypes.NUMBER, allowNull: false },
+        actual: { type: DataTypes.NUMBER, allowNull: false },
+        awardedXp: { type: DataTypes.NUMBER, allowNull: true },
+        metGoal: { type: DataTypes.BOOLEAN, allowNull: false },
+    },
+    {
+        sequelize,
+        modelName: 'GoalAudit',
+    }
+)
+
 export class AwardXp extends Model {
     public id!: string
     public discordId!: string
@@ -155,6 +185,9 @@ export class WcEntry extends Model {
     public readonly updatedAt!: Date
 
     // References
+    public userId!: string
+    public sprintId!: string
+
     public readonly user!: User
     public readonly sprint?: Sprint
 }

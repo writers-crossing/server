@@ -3,14 +3,14 @@ import config from '../../../data/config.json'
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
 import { Sprint, WcEntry } from '../../app/entities'
-import { getEntityUserFromDiscordUser, recalculateUserStats, getActiveSprint } from '../../app/database'
+import { getEntityUserFromDiscordUser, recalculateUserMetrics, getActiveSprint } from '../../app/database'
 import logger from '../../app/logger'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
 	.setDMPermission(false)
 	.setDescription('Adds word count to your total.')
-	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(0).setMaxValue(50000).setRequired(true))
+	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(1).setMaxValue(50000).setRequired(true))
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -58,7 +58,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		userId: user.id
 	})
 
-	await recalculateUserStats(user.id)
+	await recalculateUserMetrics(user.id)
 
 	await user.reload()
 

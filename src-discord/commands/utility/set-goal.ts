@@ -26,5 +26,5 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         throw new Error('Invalid type parameter.')
     }
 
-    await interaction.reply(`You have updated your ${typeParameter} goal to ${goalParameter}.`)
+    await interaction.reply(`You have updated your ${typeParameter} goal to ${goalParameter} words.`)
 }

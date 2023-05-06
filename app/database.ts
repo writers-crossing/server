@@ -54,12 +54,11 @@ export const addWordCount = async (userId: string, wordCount: number, project: s
         userId: userId
     })
 
-    await recalculateUserStats(userId)
+    await recalculateUserMetrics(userId)
 }
 
-export const recalculateUserStats = async (userId: string) => {
-    let user = await User.findOne({ where: { id: userId } })
-
+export const recalculateUserMetrics = async (userId: string) => {
+    const user = await User.findOne({ where: { id: userId } })
     if (user == null) {
         throw new Error(`Cannot find user with id of ${userId}.`)
     }
@@ -69,44 +68,52 @@ export const recalculateUserStats = async (userId: string) => {
     let year = now.getFullYear()
     let month = now.getMonth()
 
-    const wcDaily = await WcEntry.sum('wordCount', {
+    const date = new Date(year, month, day)
+    const dayOfWeek = date.getDay()
+    const diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+    const firstDayOfWeek = new Date(year, month, day - diff)
+    const lastDayOfWeek = new Date(year, month, day + (6 - diff))
+    const firstDayOfMonth = new Date(year, month, 1)
+    const lastDayOfMonth = new Date(year, month + 1, 0)
+    const firstDayOfYear = new Date(year, 0, 1)
+    const lastDayOfYear = new Date(year + 1, 0, 0)
+
+    const entries = await WcEntry.findAll({
         where: {
-            userId: userId,
+            userId: user.id,
             timestamp: {
-                [Op.gte]: new Date(year, month, day),
-                [Op.lt]: new Date(year, month, day + 1),
+                [Op.gte]: new Date(year, 0, 1)
             }
         }
-    }) ?? 0
+    })
 
-    const wcMonthly = await WcEntry.sum('wordCount', {
-        where: {
-            userId: userId,
-            timestamp: {
-                [Op.gte]: new Date(year, month, 1),
-                [Op.lt]: new Date(year, month, 31),
-            }
-        }
-    }) ?? 0
+    const wcDaily = entries
+        .filter(entry => entry.userId === userId && new Date(entry.timestamp).getDate() === day)
+        .reduce((sum, entry) => sum + entry.wordCount, 0)
 
-    const wcYearly = await WcEntry.sum('wordCount', {
-        where: {
-            userId: userId,
-            timestamp: {
-                [Op.gte]: new Date(year, 1, 1),
-                [Op.lt]: new Date(year, 12, 31),
-            }
-        }
-    }) ?? 0
+    const wcWeekly = entries
+        .filter(entry => entry.userId === userId &&
+            new Date(entry.timestamp) >= firstDayOfWeek &&
+            new Date(entry.timestamp) <= lastDayOfWeek)
+        .reduce((sum, entry) => sum + entry.wordCount, 0)
 
-    const wcTotal = await WcEntry.sum('wordCount', {
-        where: {
-            userId: userId
-        }
-    }) ?? 0
+    const wcMonthly = entries
+        .filter(entry => entry.userId === userId &&
+            new Date(entry.timestamp) >= firstDayOfMonth &&
+            new Date(entry.timestamp) <= lastDayOfMonth)
+        .reduce((sum, entry) => sum + entry.wordCount, 0)
+
+    const wcYearly = entries
+        .filter(entry => entry.userId === userId &&
+            new Date(entry.timestamp) >= firstDayOfYear &&
+            new Date(entry.timestamp) <= lastDayOfYear)
+        .reduce((sum, entry) => sum + entry.wordCount, 0)
+
+    const wcTotal = await WcEntry.sum('wordCount', { where: { userId: userId } }) ?? 0
 
     await user.update({
         wcDaily: wcDaily,
+        wcWeekly: wcWeekly,
         wcMonthly: wcMonthly,
         wcYearly: wcYearly,
         wcTotal: wcTotal
@@ -118,7 +125,7 @@ export const getSprintWinner = async (sprintId: string) => {
     let winnerUserId = (winnerLeaderboard[0] as any)['user_id'] as string | null
 
     if (winnerUserId) {
-        return await User.findOne({ where: { id: winnerUserId }})
+        return await User.findOne({ where: { id: winnerUserId } })
     }
 
     return null
@@ -137,7 +144,7 @@ export const getSprintLeaderboard = async (sprintId: string, limit = 99) => {
         ORDER BY count DESC
         LIMIT ?;
     `, {
-        replacements: [ sprintId, limit ],
+        replacements: [sprintId, limit],
         type: QueryTypes.SELECT
     })
 }
