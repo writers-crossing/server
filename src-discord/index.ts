@@ -10,12 +10,15 @@ declare module "discord.js" {
 
 import logger from './app/logger'
 
-// Require the necessary discord.js classes
 import { Client, Events, GatewayIntentBits, Collection } from 'discord.js'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
+import cron from 'node-cron'
+
 import config from '../data/config.json'
+import { AwardXp } from './app/entities'
+import { awardXp } from './discord-commands'
 
 (async () => {
     // Create a new client instance
@@ -66,6 +69,18 @@ import config from '../data/config.json'
             }
         }
     })
+
+    cron.schedule('* * * * *', async () => {
+        const pendingXp = await AwardXp.findAll({ where: { processed: false } })
+        
+        for (const xp of pendingXp) {
+            await awardXp(client, xp.discordId, xp.xp)
+
+            xp.processed = true
+            xp.save()
+        }
+    })
+    
 
     client.once(Events.ClientReady, c => {
         logger.info(`Discord Ready! Logged in as ${c.user.tag}`)

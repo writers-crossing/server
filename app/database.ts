@@ -1,19 +1,7 @@
-import logger from './logger'
 import sequelize from './sequelize'
 import { Sprint, WcEntry, User } from './entities'
 
-import { Sequelize, Op, QueryTypes } from 'sequelize'
-
-export const initialize = async () => {
-    await sequelize.sync({ force: false, alter: { drop: false } })
-
-    const [sprintsTerminatedAffectedCount] = await Sprint.update({ ended: true }, { where: { ended: false } })
-    if (sprintsTerminatedAffectedCount > 0) {
-        logger.warn(`Cleared ${sprintsTerminatedAffectedCount} sprints that were terminated midway.`)
-    }
-
-    logger.info('Database Ready!')
-}
+import { Op, QueryTypes } from 'sequelize'
 
 export const getEntityUserByDiscordId = async (x: string) => {
     return await User.findOne({ where: { discordId: x } })

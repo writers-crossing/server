@@ -1,9 +1,10 @@
 import { Sequelize } from 'sequelize'
 import logger from './logger'
+import config from '../data/config.json'
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',
-    storage: './../data/database.sqlite',
+    storage: config.databaseAbsolutePath,
     logging: (msg) => {
         if (msg.startsWith('Executing')) {
             logger.debug(msg);

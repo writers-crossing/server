@@ -4,6 +4,34 @@ import { writeFileSync } from 'node:fs'
 import axios from 'axios'
 import logger from './logger'
 
+export class AwardXp extends Model {
+    public id!: string
+    public discordId!: string
+    public xp!: number
+    public processed!: boolean
+}
+
+AwardXp.init(
+    {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            allowNull: false,
+            primaryKey: true,
+        },
+        discordId: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        xp: { type: DataTypes.NUMBER, allowNull: false },
+        processed: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
+    },
+    {
+        sequelize,
+        modelName: 'AwardXp',
+    }
+)
+
 export class User extends Model {
     public id!: string
     public name!: string
