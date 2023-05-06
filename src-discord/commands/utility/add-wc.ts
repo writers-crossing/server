@@ -1,3 +1,5 @@
+import config from '../../../data/config.json'
+
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
 import { Sprint, WcEntry } from '../../app/entities'
@@ -12,6 +14,15 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
+    if (interaction.channel?.id != config.discordStudyHallId) {
+        await interaction.reply({
+            content: `You cannot use this command outside of <#${config.discordStudyHallId}>.`,
+            ephemeral: true
+        })
+
+        return
+    }
+
 	const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
 	const wordCount = Math.floor(interaction.options.getNumber('wordcount') ?? 0)
 	let project = interaction.options.getString('project')

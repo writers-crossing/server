@@ -13,13 +13,21 @@ export const data = new SlashCommandBuilder()
     .addNumberOption(x => x.setName('minutes').setDescription('number of minutes the sprint will last').setMinValue(1).setMaxValue(60).setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
-    if (await getActiveSprint() != null) {
-        await interaction.reply(`You cannot start a sprint. A sprint is already active.`)
+    if (interaction.channel?.id != config.discordStudyHallId) {
+        await interaction.reply({
+            content: `You cannot use this command outside of <#${config.discordStudyHallId}>.`,
+            ephemeral: true
+        })
+
         return
     }
+    
+    if (await getActiveSprint() != null) {
+        await interaction.reply({
+            content: 'You cannot start a sprint when one is already active.',
+            ephemeral: true
+        })
 
-    if (!interaction.channel) {
-        await interaction.reply(`You cannot start a sprint outside of the guild.`)
         return
     }
 
