@@ -30,7 +30,7 @@ GoalAudit.init(
     },
     {
         sequelize,
-        modelName: 'GoalAudit',
+        modelName: 'GoalAudits',
     }
 )
 
