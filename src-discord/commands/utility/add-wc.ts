@@ -33,7 +33,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	if (project && project.toLowerCase().startsWith("sprint")) {
 		// Determine if there is a sprint and count it towards that.
 		if (!activeSprint) {
-			await interaction.reply(`There is no sprint active right now, you cannot submit WC to a sprint.`);
+			await interaction.reply({
+				content: 'There is no sprint active right now, you cannot submit WC to a sprint.',
+				ephemeral: true
+			})
+
 			return;
 		}
 
@@ -42,7 +46,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		const endTimePlus10 = endTime + 10 * 60 * 1000
 
 		if (now < endTime || now > endTimePlus10) {
-			await interaction.reply(`It's not time yet to submit yet for the sprint. Please wait until after the sprint ends.`);
+			await interaction.reply({
+				content: 'It is not time yet to submit yet for the sprint. Please wait until after the sprint ends.',
+				ephemeral: true
+			})
+
 			return;
 		}
 
@@ -58,15 +66,18 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		userId: user.id
 	})
 
-	await recalculateUserMetrics(user.id)
-
-	await user.reload()
+	user.wcDaily += wordCount
+	user.wcMonthly += wordCount
+	user.wcYearly += wordCount
+	user.wcTotal += wordCount
+	
+	await user.save()
 
 	if (sprint) {
 		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words to sprint ${sprint.id}.`)
-		await interaction.reply(`Your contribution to the sprint has been recorded, ${interaction.user}!`)
+		await interaction.reply(`${interaction.user} has contributed to the sprint.`)
 	} else {
-		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words.`)
-		await interaction.reply(`Thanks for your contribution ${interaction.user}!\nYour total word count for the day is ${formatWc(user.wcDaily)}.`)
+		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words. Their current total for the day is ${formatWc(user.wcDaily)} words.`)
+		await interaction.reply(`${interaction.user} has recorded their daily word count!\nTheir current total for the day is ${formatWc(user.wcDaily)} words.`)
 	}
 }

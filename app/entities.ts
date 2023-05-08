@@ -1,20 +1,33 @@
-import { DataTypes, Model } from 'sequelize'
-import sequelize from './sequelize'
+import { Sequelize, DataTypes, Model } from 'sequelize'
 import { writeFileSync } from 'node:fs'
 import axios from 'axios'
 import logger from './logger'
+import config from '../data/config.json'
 
-export class GoalAudit extends Model {
+const sequelize = new Sequelize({
+    dialect: 'sqlite',
+    storage: config.databaseAbsolutePath,
+    logging: (msg) => {
+        if (msg.startsWith('Executing')) {
+            logger.debug(msg);
+        } else if (msg.startsWith('Executed')) {
+            logger.info(msg);
+        } else if (msg.startsWith('Error')) {
+            logger.error(msg);
+        } else {
+            logger.verbose(msg);
+        }
+    }
+})
+
+export default sequelize
+
+export class Badge extends Model {
     public id!: string
-    public type!: string
-    public userId!: string
-    public goal!: number
-    public actual!: number
-    public awardedXp?: number
-    public metGoal!: boolean
+    public name!: string
 }
 
-GoalAudit.init(
+Badge.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -22,21 +35,21 @@ GoalAudit.init(
             allowNull: false,
             primaryKey: true,
         },
-        type: { type: DataTypes.STRING, allowNull: false },
-        goal: { type: DataTypes.NUMBER, allowNull: false },
-        actual: { type: DataTypes.NUMBER, allowNull: false },
-        awardedXp: { type: DataTypes.NUMBER, allowNull: true },
-        metGoal: { type: DataTypes.BOOLEAN, allowNull: false },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     },
     {
         sequelize,
-        modelName: 'GoalAudits',
+        modelName: 'Badges',
     }
 )
 
 export class AwardXp extends Model {
     public id!: string
     public discordId!: string
+    public type!: string
     public xp!: number
     public processed!: boolean
 }
@@ -53,7 +66,14 @@ AwardXp.init(
             type: DataTypes.STRING,
             allowNull: false
         },
-        xp: { type: DataTypes.NUMBER, allowNull: false },
+        type: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        xp: {
+            type: DataTypes.NUMBER,
+            allowNull: false
+        },
         processed: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
     },
     {
@@ -74,6 +94,8 @@ export class User extends Model {
     public wcMonthly!: number
     public wcYearly!: number
     public wcTotal!: number
+
+    public dailyStreak!: number
 
     public dailyGoal?: number
     public weeklyGoal?: number
@@ -110,6 +132,8 @@ User.init(
         wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
         wcTotal: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
 
+        dailyStreak: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+
         dailyGoal: { type: DataTypes.NUMBER, allowNull: true },
         weeklyGoal: { type: DataTypes.NUMBER, allowNull: true },
         monthlyGoal: { type: DataTypes.NUMBER, allowNull: true },
@@ -128,7 +152,7 @@ export async function downloadUserAvatar(user: User) {
     if (user.discordAvatar) {
         const response = await axios.get(`https://cdn.discordapp.com/avatars/${user.discordId}/${user.discordAvatar}.png`, { responseType: 'arraybuffer' })
         const bufferWrite = Buffer.from(response.data)
-        
+
         writeFileSync(`../data/avatars/${user.id}.png`, bufferWrite)
         logger.info(`Downloaded ${user.name}'s avatar to local filesystem.`)
     }
@@ -212,6 +236,9 @@ WcEntry.init(
 
 User.hasMany(WcEntry, { foreignKey: 'userId' })
 WcEntry.belongsTo(User, { foreignKey: 'userId' })
+
+User.belongsToMany(Badge, { through: 'UserBadges' });
+Badge.belongsToMany(User, { through: 'UserBadges' });
 
 User.hasMany(Sprint, { foreignKey: 'createdBy' })
 Sprint.belongsTo(User, { foreignKey: 'createdBy' })

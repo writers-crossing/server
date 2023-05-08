@@ -3,62 +3,45 @@
         <img src="/users/{{ user.id }}/avatar.png" class="mb-3" style="width: 128px; height: 128px;" />
 
         <h3>{{ user.name }}</h3>
-    </div>
-    <div class="col">
-        <div class="d-flex justify-content-around gap-3">
-            <!-- Monthly -->
-            <div class="card text-center mb-3" style="width: 18rem;">
-                <div class="card-body">
-                    <p class="card-text fs-1">{{ formatWc user.wcMonthly }}</p>
-                    <h5 class="card-title">Monthly Word Count</h5>
-                </div>
-            </div>
 
-            <!-- Yearly -->
-            <div class="card text-center mb-3" style="width: 18rem;">
-                <div class="card-body">
-                    <p class="card-text fs-1">{{ formatWc user.wcYearly }}</p>
-                    <h5 class="card-title">Yearly Word Count</h5>
-                </div>
-            </div>
-
-            <!-- Total -->
-            <div class="card text-center mb-3" style="width: 18rem;">
-                <div class="card-body">
-                    <p class="card-text fs-1">{{ formatWc user.wcTotal }}</p>
-                    <h5 class="card-title">Total Word Count</h5>
-                </div>
-            </div>
+        <div class="mt-4">
+            <h5 class="border-bottom pb-1 mb-1">Current Stats</h5>
+            <div><label>Daily Word Count: </label><span class="float-end">{{ formatWc user.wcDaily }}</span></div>
+            <div><label>Weekly Word Count: </label><span class="float-end">{{ formatWc user.wcWeekly }}</span></div>
+            <div><label>Monthly Word Count: </label><span class="float-end">{{ formatWc user.wcMonthly }}</span></div>
+            <div><label>Yearly Word Count: </label><span class="float-end">{{ formatWc user.wcYearly }}</span></div>
+            <div><label>Total Word Count: </label><span class="float-end">{{ formatWc user.wcTotal }}</span></div>
         </div>
 
-        <!--
-        <div class="mt-3">
-            {{#if entries}}
-            <table class="table px-3">
-                <thead>
-                    <tr>
-                        <th>Ranking</th>
-                        <th>User</th>
-                        <th>Word Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{#each monthlyLeaderboardUsers}}
-                    <tr>
-                        <td>{{ rowNumber }}</td>
-                        <td>
-                            <img class="avatar-tiny" src="/users/{{ id }}/avatar.png" />
-                            <a href="/users/{{ id }}/">{{ name }}</a>
-                        </td>
-                        <td>{{ formatWc count }} words</td>
-                    </tr>
-                    {{/each}}
-                </tbody>
-            </table>
-            {{else}}
-            <p class="text-center">This user has not submitted any entries.</p>
+        {{#if hasGoals}}
+        <div class="mt-4">
+            <h5 class="border-bottom pb-1 mb-1">Goals</h5>
+            {{#if user.dailyGoal }}
+            <div><label>Daily Word Count: </label><span class="float-end">{{ formatWc user.dailyGoal }}</span></div>
+            {{/if}}
+            {{#if user.weeklyGoal }}
+            <div><label>Weekly Word Count: </label><span class="float-end">{{ formatWc user.weeklyGoal }}</span></div>
+            {{/if}}
+            {{#if user.monthlyGoal }}
+            <div><label>Monthly Word Count: </label><span class="float-end">{{ formatWc user.monthlyGoal }}</span></div>
+            {{/if}}
+            {{#if user.yearlyGoal }}
+            <div><label>Yearly Word Count: </label><span class="float-end">{{ formatWc user.yearlyGoal }}</span></div>
             {{/if}}
         </div>
-        -->
+        {{/if}}
+    </div>
+    <div class="col">
+        {{#if hasBadges}}
+        <h5>Badges Earned</h5>
+        <div class="d-flex justify-content-around gap-3">
+            <div class="card text-center mb-3" style="width: 18rem;">
+                <div class="card-body">
+                    <p class="card-text fs-1">Test Badge</p>
+                    <h5 class="card-title">Test Badge</h5>
+                </div>
+            </div>
+        </div>
+        {{/if}}
     </div>
 </div>

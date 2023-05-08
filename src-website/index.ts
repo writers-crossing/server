@@ -10,7 +10,7 @@ import path from 'node:path'
 import config from '../data/config.json'
 import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard } from './app/database'
 import { formatWc, getMonthName } from './app/business'
-import { Sprint } from './app/entities'
+import { Sprint, WcEntry } from './app/entities'
 
 const app = express()
 const port = config.expressPort
@@ -40,7 +40,12 @@ app.get('/users/:id', async (req, res, next) => {
   let user = await getEntityUserByAny(req.params.id)
   if (!user || user?.isHidden) { return next() }
 
-  return res.render('user', { title: `${user.name}'s Profile`, user: user })
+  return res.render('user', {
+    title: `${user.name}'s Profile`,
+    user: user,
+    hasBadges: false,
+    hasGoals: user.dailyGoal || user.weeklyGoal || user.monthlyGoal || user.yearlyGoal
+  })
 })
 
 app.get('/users/:id/avatar.png', async (req, res, next) => {

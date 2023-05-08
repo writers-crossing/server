@@ -1,4 +1,4 @@
-import sequelize from './sequelize'
+import sequelize from './entities'
 import { Sprint, WcEntry, User } from './entities'
 
 import { Op, QueryTypes } from 'sequelize'
@@ -46,17 +46,6 @@ export const getActiveSprint = async () => {
     })
 }
 
-export const addWordCount = async (userId: string, wordCount: number, project: string) => {
-    await WcEntry.create({
-        timestamp: Date.now(),
-        wordCount: wordCount,
-        project: project,
-        userId: userId
-    })
-
-    await recalculateUserMetrics(userId)
-}
-
 export const recalculateUserMetrics = async (userId: string) => {
     const user = await User.findOne({ where: { id: userId } })
     if (user == null) {
@@ -82,31 +71,28 @@ export const recalculateUserMetrics = async (userId: string) => {
         where: {
             userId: user.id,
             timestamp: {
-                [Op.gte]: new Date(year, 0, 1)
+                [Op.gte]: new Date(year, 0, 1, 0, 0, 0, 0)
             }
         }
     })
 
     const wcDaily = entries
-        .filter(entry => entry.userId === userId && new Date(entry.timestamp).getDate() === day)
+        .filter(entry => new Date(entry.timestamp.getFullYear(), entry.timestamp.getMonth(), entry.timestamp.getDay()) === date)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcWeekly = entries
-        .filter(entry => entry.userId === userId &&
-            new Date(entry.timestamp) >= firstDayOfWeek &&
-            new Date(entry.timestamp) <= lastDayOfWeek)
+        .filter(entry => new Date(entry.timestamp) >= firstDayOfWeek &&
+                         new Date(entry.timestamp) <= lastDayOfWeek)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcMonthly = entries
-        .filter(entry => entry.userId === userId &&
-            new Date(entry.timestamp) >= firstDayOfMonth &&
-            new Date(entry.timestamp) <= lastDayOfMonth)
+        .filter(entry => new Date(entry.timestamp) >= firstDayOfMonth &&
+                         new Date(entry.timestamp) <= lastDayOfMonth)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcYearly = entries
-        .filter(entry => entry.userId === userId &&
-            new Date(entry.timestamp) >= firstDayOfYear &&
-            new Date(entry.timestamp) <= lastDayOfYear)
+        .filter(entry => new Date(entry.timestamp) >= firstDayOfYear &&
+                         new Date(entry.timestamp) <= lastDayOfYear)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcTotal = await WcEntry.sum('wordCount', { where: { userId: userId } }) ?? 0
