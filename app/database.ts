@@ -50,6 +50,32 @@ export const getActiveSprint = async () => {
     })
 }
 
+export const getAllBadgesForUser = async (userId: string) => {
+    return await sequelize.query<any>(`
+        SELECT
+            Badges.name,
+            Badges.description,
+            Badges.icon,
+            Badges.hexdecimalColor,
+            UserBadges.createdAt
+        FROM Badges
+        INNER JOIN UserBadges ON Badges.id = UserBadges.badgeId
+        WHERE UserBadges.userId = ?
+        ORDER BY UserBadges.createdAt DESC;
+    `, {
+        replacements: [userId],
+        type: QueryTypes.SELECT
+    }).then(x => x.map(y => {
+        return {
+            name: y.name,
+            description: y.description,
+            icon: y.icon,
+            hexdecimalColor: y.hexdecimalColor,
+            createdAt: y.createdAt
+        }
+    }))
+}
+
 export const awardBadge = async (user: User, badgeId: string) => {
     const badge = await Badge.findByPk(badgeId)
     if (!badge) throw new Error(`Unable to find badge ${badgeId}.`)

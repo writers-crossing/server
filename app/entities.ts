@@ -25,6 +25,8 @@ export default sequelize
 export class Badge extends Model {
     public id!: string
     public name!: string
+    public icon!: string
+    public hexdecimalColor!: string
     public description!: string
     public xp!: number
 }
@@ -38,6 +40,14 @@ Badge.init(
             primaryKey: true,
         },
         name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        icon: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        hexdecimalColor: {
             type: DataTypes.STRING,
             allowNull: false
         },

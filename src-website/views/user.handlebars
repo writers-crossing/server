@@ -45,12 +45,20 @@
         {{#if hasBadges}}
         <h5>Badges Earned</h5>
         <div class="d-flex justify-content-around gap-3">
+            {{#each badges}}
             <div class="card text-center mb-3" style="width: 18rem;">
+                <div class="card-top bg-secondary display-3 py-3">
+                    <i class="bi {{ icon }}" style="color: {{ hexdecimalColor }}"></i>
+                </div>
                 <div class="card-body">
-                    <p class="card-text fs-1">Test Badge</p>
-                    <h5 class="card-title">Test Badge</h5>
+                    <h5 class="card-title fw-bold">{{ name }}</h5>
+                    <div class="card-text">
+                        <div class="mb-2">{{ description }}</div>
+                        <small>Awarded {{ dateFormat createdAt "l" }}</small>
+                    </div>
                 </div>
             </div>
+            {{/each}}
         </div>
         {{/if}}
     </div>

@@ -8,7 +8,7 @@ import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access
 import path from 'node:path'
 
 import config from '../data/config.json'
-import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard, getStreakLeaderboard } from './app/database'
+import { getAllBadgesForUser, getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard, getStreakLeaderboard } from './app/database'
 import { formatWc, getMonthName } from './app/business'
 import { Sprint, Badge } from './app/entities'
 
@@ -18,6 +18,7 @@ const port = config.expressPort
 app.engine('handlebars', engine({
   handlebars: allowInsecurePrototypeAccess(Handlebars),
   helpers: {
+    dateFormat: require('handlebars-dateformat'),
     formatWc: (wc: any) => { return formatWc(parseInt(wc)) }
   }
 }))
@@ -29,6 +30,7 @@ app.use(express.static('public'))
 // Homepage
 app.get('/', async (_, res) => {
   return res.render('home', {
+    robotAllowIndex: true,
     month: getMonthName(new Date()),
     monthlyLeaderboardUsers: await getMonthLeaderboard(),
     allTimeLeaderboardUsers: await getAllTimeLeaderboard(),
@@ -46,13 +48,16 @@ app.get('/badges', async (_, res) => {
 
 // Users
 app.get('/users/:id', async (req, res, next) => {
-  let user = await getEntityUserByAny(req.params.id)
+  const user = await getEntityUserByAny(req.params.id)
   if (!user || user?.isHidden) { return next() }
+
+  const badges = await getAllBadgesForUser(user.id)
 
   return res.render('user', {
     title: `${user.name}'s Profile`,
     user: user,
-    hasBadges: false,
+    badges: badges,
+    hasBadges: badges.length > 0,
     hasGoals: user.dailyGoal || user.weeklyGoal || user.monthlyGoal || user.yearlyGoal
   })
 })
