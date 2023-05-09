@@ -94,7 +94,7 @@ cron.schedule('* * * * *', async () => {
     for (const xp of pendingXp) {
         await awardXp(client, xp.discordId, xp.xp)
 
-        crosstalkChannel.send(`!give-xp <@${xp.discordId}> ${xp.xp}`)
+        await crosstalkChannel.send(`!give-xp <@${xp.discordId}> ${xp.xp}`)
         logger.info(`Gave discord user ${xp.discordId} +${xp.xp} xp.`)
 
         xp.processed = true
@@ -109,7 +109,7 @@ cron.schedule('* * * * *', async () => {
     for (const log of messageLog) {
         const channel = client.channels.cache.get(log.channelId)
         if (channel && channel.type === ChannelType.GuildText) {
-            channel.send(log.message)
+            await channel.send(log.message)
         }
 
         logger.info(`DiscordMessageLog (${log.id}) ${log.message.replace('\n', '')}`)
