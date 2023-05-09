@@ -2,9 +2,10 @@ import config from '../../../data/config.json'
 
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
-import { Sprint, WcEntry } from '../../app/entities'
-import { getEntityUserFromDiscordUser, recalculateUserMetrics, getActiveSprint } from '../../app/database'
+import { Sprint, UserBadges, WcEntry } from '../../app/entities'
+import { getEntityUserFromDiscordUser, recalculateUserMetrics, getActiveSprint, awardBadge } from '../../app/database'
 import logger from '../../app/logger'
+import { badgeIds } from '../../app/constants'
 
 export const data = new SlashCommandBuilder()
 	.setName('add-wc')
@@ -79,5 +80,9 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	} else {
 		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words. Their current total for the day is ${formatWc(user.wcDaily)} words.`)
 		await interaction.reply(`${interaction.user} has recorded their daily word count!\nTheir current total for the day is ${formatWc(user.wcDaily)} words.`)
+	}
+
+	if (await UserBadges.count({ where: { badgeId: badgeIds.initial_11 }}) < 11) {
+		await awardBadge(user, badgeIds.initial_11)
 	}
 }

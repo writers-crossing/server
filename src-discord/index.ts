@@ -1,7 +1,6 @@
 // https://discord.com/api/oauth2/authorize?client_id=1102814795012522024&permissions=58272035371840&scope=bot%20applications.commands
 // https://discord.com/api/oauth2/authorize?client_id=1102699152770605087&permissions=58272035371840&scope=bot%20applications.commands
 
-
 declare module "discord.js" {
     export interface Client {
         commands: Collection<unknown, any>
@@ -10,20 +9,20 @@ declare module "discord.js" {
 
 import logger from './app/logger'
 
-import { Client, Events, GatewayIntentBits, Collection } from 'discord.js'
+import { Client, Events, GatewayIntentBits, Collection, ChannelType } from 'discord.js'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 import cron from 'node-cron'
 
 import config from '../data/config.json'
-import { AwardXp, Sprint } from './app/entities'
+import { AwardXp, DiscordMessageLog, Sprint } from './app/entities'
 import { awardXp } from './discord-commands'
 
-(async () => {
-    // Create a new client instance
-    const client = new Client({ intents: [GatewayIntentBits.Guilds] })
+// Create a new client instance
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
+(async () => {
     // Load all commands.
     client.commands = new Collection()
 
@@ -70,17 +69,6 @@ import { awardXp } from './discord-commands'
         }
     })
 
-    cron.schedule('* * * * *', async () => {
-        const pendingXp = await AwardXp.findAll({ where: { processed: false } })
-        
-        for (const xp of pendingXp) {
-            await awardXp(client, xp.discordId, xp.xp)
-
-            xp.processed = true
-            xp.save()
-        }
-    })
-
     const [sprintsTerminatedAffectedCount] = await Sprint.update({ ended: true }, { where: { ended: false } })
     if (sprintsTerminatedAffectedCount > 0) {
         logger.warn(`Cleared ${sprintsTerminatedAffectedCount} sprints that were terminated midway.`)
@@ -92,3 +80,41 @@ import { awardXp } from './discord-commands'
 
     client.login(config.discordToken)
 })()
+
+
+cron.schedule('* * * * *', async () => {
+    const pendingXp = await AwardXp.findAll({ where: { processed: false } })
+    if (pendingXp.length === 0) { return }
+
+    const crosstalkChannel = client.channels.cache.get(config.discordBotCrosstalkChannelId)
+    if (!crosstalkChannel || crosstalkChannel.type !== ChannelType.GuildText) {
+        throw new Error('Invalid discordBotCrosstalkChannelId was provided.')
+    }
+    
+    for (const xp of pendingXp) {
+        await awardXp(client, xp.discordId, xp.xp)
+
+        crosstalkChannel.send(`!give-xp <@${xp.discordId}> ${xp.xp}`)
+        logger.info(`Gave discord user ${xp.discordId} +${xp.xp} xp.`)
+
+        xp.processed = true
+        xp.save()
+    }
+})
+
+cron.schedule('* * * * *', async () => {
+    const messageLog = await DiscordMessageLog.findAll({ where: { processed: false } })
+    if (messageLog.length === 0) { return }
+    
+    for (const log of messageLog) {
+        const channel = client.channels.cache.get(log.channelId)
+        if (channel && channel.type === ChannelType.GuildText) {
+            channel.send(log.message)
+        }
+
+        logger.info(`DiscordMessageLog (${log.id}) ${log.message.replace('\n', '')}`)
+
+        log.processed = true
+        log.save()
+    }
+})

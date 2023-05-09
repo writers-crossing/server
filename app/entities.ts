@@ -25,6 +25,8 @@ export default sequelize
 export class Badge extends Model {
     public id!: string
     public name!: string
+    public description!: string
+    public xp!: number
 }
 
 Badge.init(
@@ -38,6 +40,14 @@ Badge.init(
         name: {
             type: DataTypes.STRING,
             allowNull: false
+        },
+        description: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
+        xp: {
+            type: DataTypes.NUMBER,
+            allowNull: false
         }
     },
     {
@@ -46,11 +56,29 @@ Badge.init(
     }
 )
 
+export class UserBadges extends Model {
+    public userId!: string
+    public badgeId!: string
+
+    public processed!: boolean
+
+    public readonly createdAt!: Date
+    public readonly updatedAt!: Date
+}
+
+UserBadges.init({},
+    {
+        sequelize,
+        tableName: 'UserBadges',
+    }
+)
+
 export class AwardXp extends Model {
     public id!: string
     public discordId!: string
     public type!: string
     public xp!: number
+    public silent!: boolean
     public processed!: boolean
 }
 
@@ -74,6 +102,7 @@ AwardXp.init(
             type: DataTypes.NUMBER,
             allowNull: false
         },
+        silent: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
         processed: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
     },
     {
@@ -81,6 +110,30 @@ AwardXp.init(
         modelName: 'AwardXp',
     }
 )
+
+export class DiscordMessageLog extends Model {
+    public id!: string
+    public channelId!: string
+    public message!: string
+    public processed!: boolean
+}
+
+DiscordMessageLog.init(
+    {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            allowNull: false,
+            primaryKey: true,
+        },
+        channelId: { type: DataTypes.STRING, allowNull: false },
+        message: { type: DataTypes.STRING, allowNull: false },
+        processed: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
+    },
+    {
+        sequelize,
+        modelName: 'DiscordMessageLog',
+    })
 
 export class User extends Model {
     public id!: string
@@ -104,6 +157,11 @@ export class User extends Model {
 
     public isInactive!: boolean
     public isHidden!: boolean
+
+    public readonly badges?: Badge[];
+    public readonly sprints?: Sprint[];
+    public readonly sprintsWon?: Sprint[];
+    public readonly wcEntries?: WcEntry[];
 
     public readonly createdAt!: Date
     public readonly updatedAt!: Date
@@ -237,8 +295,17 @@ WcEntry.init(
 User.hasMany(WcEntry, { foreignKey: 'userId' })
 WcEntry.belongsTo(User, { foreignKey: 'userId' })
 
-User.belongsToMany(Badge, { through: 'UserBadges' });
-Badge.belongsToMany(User, { through: 'UserBadges' });
+User.belongsToMany(Badge, {
+    through: 'UserBadges',
+    foreignKey: 'userId',
+    otherKey: 'badgeId',
+})
+
+Badge.belongsToMany(User, {
+    through: 'UserBadges',
+    foreignKey: 'badgeId',
+    otherKey: 'userId',
+})
 
 User.hasMany(Sprint, { foreignKey: 'createdBy' })
 Sprint.belongsTo(User, { foreignKey: 'createdBy' })

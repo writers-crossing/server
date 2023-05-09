@@ -1,7 +1,11 @@
-import sequelize from './entities'
+import config from '../data/config.json'
+import { formatWc } from './business'
+
+import sequelize, { AwardXp, Badge, DiscordMessageLog, UserBadges } from './entities'
 import { Sprint, WcEntry, User } from './entities'
 
 import { Op, QueryTypes } from 'sequelize'
+import logger from './logger'
 
 export const getEntityUserByDiscordId = async (x: string) => {
     return await User.findOne({ where: { discordId: x } })
@@ -46,6 +50,40 @@ export const getActiveSprint = async () => {
     })
 }
 
+export const awardBadge = async (user: User, badgeId: string) => {
+    const badge = await Badge.findByPk(badgeId)
+    if (!badge) throw new Error(`Unable to find badge ${badgeId}.`)
+
+    const [userBadge, created] = await UserBadges.findOrCreate({
+        where: {
+            userId: user.id,
+            badgeId: badgeId
+        },
+        defaults: {
+            userId: user.id,
+            badgeId: badgeId
+        }
+    })
+
+    if (created) {
+        await AwardXp.create({
+            discordId: user.discordId,
+            type: `Badge ${badge.id}`,
+            xp: badge.xp,
+            silent: true
+        })
+
+        await DiscordMessageLog.create({
+            channelId: config.discordStudyHallId,
+            message: `<@${user.discordId}> has been awarded the :coin: **${badge.name}**!\nThis gives them +${formatWc(badge.xp)} XP! Congratulations!`
+        })
+
+        logger.info(`Awarded ${user.id} ${user.name} the badge ${badge.id} ${badge.name}.`)
+    }
+
+    return created
+}
+
 export const recalculateUserMetrics = async (userId: string) => {
     const user = await User.findOne({ where: { id: userId } })
     if (user == null) {
@@ -82,17 +120,17 @@ export const recalculateUserMetrics = async (userId: string) => {
 
     const wcWeekly = entries
         .filter(entry => new Date(entry.timestamp) >= firstDayOfWeek &&
-                         new Date(entry.timestamp) <= lastDayOfWeek)
+            new Date(entry.timestamp) <= lastDayOfWeek)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcMonthly = entries
         .filter(entry => new Date(entry.timestamp) >= firstDayOfMonth &&
-                         new Date(entry.timestamp) <= lastDayOfMonth)
+            new Date(entry.timestamp) <= lastDayOfMonth)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcYearly = entries
         .filter(entry => new Date(entry.timestamp) >= firstDayOfYear &&
-                         new Date(entry.timestamp) <= lastDayOfYear)
+            new Date(entry.timestamp) <= lastDayOfYear)
         .reduce((sum, entry) => sum + entry.wordCount, 0)
 
     const wcTotal = await WcEntry.sum('wordCount', { where: { userId: userId } }) ?? 0
