@@ -68,6 +68,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	})
 
 	user.wcDaily += wordCount
+	user.wcWeekly += wordCount
 	user.wcMonthly += wordCount
 	user.wcYearly += wordCount
 	user.wcTotal += wordCount
