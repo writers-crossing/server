@@ -10,7 +10,7 @@ import path from 'node:path'
 import config from '../data/config.json'
 import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard, getStreakLeaderboard } from './app/database'
 import { formatWc, getMonthName } from './app/business'
-import { Sprint, WcEntry } from './app/entities'
+import { Sprint, Badge } from './app/entities'
 
 const app = express()
 const port = config.expressPort
@@ -33,6 +33,14 @@ app.get('/', async (_, res) => {
     monthlyLeaderboardUsers: await getMonthLeaderboard(),
     allTimeLeaderboardUsers: await getAllTimeLeaderboard(),
     dailyStreakLeaderboardUsers: await getStreakLeaderboard()
+  })
+})
+
+// Badges
+app.get('/badges', async (_, res) => {
+  return res.render('badges', {
+    title: 'Badges',
+    badges: await Badge.findAll(),
   })
 })
 
