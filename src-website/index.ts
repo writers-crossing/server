@@ -8,7 +8,7 @@ import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access
 import path from 'node:path'
 
 import config from '../data/config.json'
-import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard } from './app/database'
+import { getAllTimeLeaderboard, getEntityUserByAny, getMonthLeaderboard, getSprintLeaderboard, getStreakLeaderboard } from './app/database'
 import { formatWc, getMonthName } from './app/business'
 import { Sprint, WcEntry } from './app/entities'
 
@@ -31,7 +31,8 @@ app.get('/', async (_, res) => {
   return res.render('home', {
     month: getMonthName(new Date()),
     monthlyLeaderboardUsers: await getMonthLeaderboard(),
-    allTimeLeaderboardUsers: await getAllTimeLeaderboard()
+    allTimeLeaderboardUsers: await getAllTimeLeaderboard(),
+    dailyStreakLeaderboardUsers: await getStreakLeaderboard()
   })
 })
 

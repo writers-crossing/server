@@ -1,8 +1,18 @@
 <div class="row align-items-start">
-    <div class="col-3">
-        <img src="/users/{{ user.id }}/avatar.png" class="mb-3" style="width: 128px; height: 128px;" />
+    <div class="col-12 col-lg-3">
+        <div class="text-center text-lg-start">
+            <img src="/users/{{ user.id }}/avatar.png" class="mb-3" style="width: 128px; height: 128px;" />
 
-        <h3>{{ user.name }}</h3>
+            <h3 class="fw-bold">
+                {{ user.name }}
+            </h3>
+
+            {{#if user.dailyStreak}}
+            <h3>
+                <div class="badge text-bg-warning">{{ user.dailyStreak }} Day Streak!</div>
+            </h3>
+            {{/if}}
+        </div>
 
         <div class="mt-4">
             <h5 class="border-bottom pb-1 mb-1">Current Stats</h5>
