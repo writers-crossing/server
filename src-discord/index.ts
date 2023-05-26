@@ -9,18 +9,43 @@ declare module "discord.js" {
 
 import logger from './app/logger'
 
-import { Client, Events, GatewayIntentBits, Collection, ChannelType } from 'discord.js'
+import cron from 'node-cron'
+import { Client, Events, GatewayIntentBits, Collection, ChannelType, User } from 'discord.js'
 import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
-import cron from 'node-cron'
-
 import config from '../data/config.json'
-import { AwardXp, DiscordMessageLog, Sprint } from './app/entities'
-import { awardXp } from './discord-commands'
+import { Sprint, UserBadges } from './app/entities'
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+async function processBadges() {
+    const badgesToProcess = await UserBadges.findAll({
+        where: { processed: false },
+        include: [{ all: true }]
+    })
+
+    if (badgesToProcess.length === 0) { return }
+
+    const studyHallChannel = client.channels.cache.get(config.discordStudyHallId)
+    if (!studyHallChannel || studyHallChannel.type !== ChannelType.GuildText) {
+        throw new Error('Invalid discordStudyHallId was provided.')
+    }
+
+    for (const userBadge of badgesToProcess) {
+        try {
+            await studyHallChannel.send(`<@${userBadge.user.discordId}> has been awarded the ${userBadge.badge.name}!`)
+
+            userBadge.processed = true
+            userBadge.save()
+
+            logger.info(`Processed user badge ${userBadge.badge.id} for user ${userBadge.user.id}. Awarded ${userBadge.user.name} the badge ${userBadge.badge.name}.`)
+        } catch (err: Error | any) {
+            logger.error(`Unable to process badge ${userBadge.badge?.id} for user ${userBadge.user?.id}. ${err?.message}`, { err: err })
+        }
+    }
+}
 
 (async () => {
     // Load all commands.
@@ -74,47 +99,21 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds] });
         logger.warn(`Cleared ${sprintsTerminatedAffectedCount} sprints that were terminated midway.`)
     }
 
-    client.once(Events.ClientReady, c => {
+    client.once(Events.ClientReady, async c => {
         logger.info(`Discord Ready! Logged in as ${c.user.tag}`)
+
+        // await processBadges()
+
+        /*
+        cron.schedule('* * * * *', async () => {
+            try {
+                await processBadges()
+            } catch (err: Error | any) {
+                logger.error(err)
+            }
+        })
+        */
     })
 
     client.login(config.discordToken)
 })()
-
-
-cron.schedule('* * * * *', async () => {
-    const pendingXp = await AwardXp.findAll({ where: { processed: false } })
-    if (pendingXp.length === 0) { return }
-
-    const crosstalkChannel = client.channels.cache.get(config.discordBotCrosstalkChannelId)
-    if (!crosstalkChannel || crosstalkChannel.type !== ChannelType.GuildText) {
-        throw new Error('Invalid discordBotCrosstalkChannelId was provided.')
-    }
-    
-    for (const xp of pendingXp) {
-        await awardXp(client, xp.discordId, xp.xp)
-
-        await crosstalkChannel.send(`!give-xp <@${xp.discordId}> ${xp.xp}`)
-        logger.info(`Gave discord user ${xp.discordId} +${xp.xp} xp.`)
-
-        xp.processed = true
-        xp.save()
-    }
-})
-
-cron.schedule('* * * * *', async () => {
-    const messageLog = await DiscordMessageLog.findAll({ where: { processed: false } })
-    if (messageLog.length === 0) { return }
-    
-    for (const log of messageLog) {
-        const channel = client.channels.cache.get(log.channelId)
-        if (channel && channel.type === ChannelType.GuildText) {
-            await channel.send(log.message)
-        }
-
-        logger.info(`DiscordMessageLog (${log.id}) ${log.message.replace('\n', '')}`)
-
-        log.processed = true
-        log.save()
-    }
-})

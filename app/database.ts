@@ -1,7 +1,7 @@
 import config from '../data/config.json'
 import { formatWc } from './business'
 
-import sequelize, { AwardXp, Badge, DiscordMessageLog, UserBadges } from './entities'
+import sequelize, { Badge, UserBadges } from './entities'
 import { Sprint, WcEntry, User } from './entities'
 
 import { Op, QueryTypes } from 'sequelize'
@@ -76,11 +76,11 @@ export const getAllBadgesForUser = async (userId: string) => {
     }))
 }
 
-export const awardBadge = async (user: User, badgeId: string) => {
+export const awardBadge = async (user: User, badgeId: string): Promise<boolean> => {
     const badge = await Badge.findByPk(badgeId)
     if (!badge) throw new Error(`Unable to find badge ${badgeId}.`)
 
-    const [userBadge, created] = await UserBadges.findOrCreate({
+    const [_, created] = await UserBadges.findOrCreate({
         where: {
             userId: user.id,
             badgeId: badgeId
@@ -92,18 +92,6 @@ export const awardBadge = async (user: User, badgeId: string) => {
     })
 
     if (created) {
-        await AwardXp.create({
-            discordId: user.discordId,
-            type: `Badge ${badge.id}`,
-            xp: badge.xp,
-            silent: true
-        })
-
-        await DiscordMessageLog.create({
-            channelId: config.discordStudyHallId,
-            message: `<@${user.discordId}> has been awarded the :coin: **${badge.name}**!\nThis gives them +${formatWc(badge.xp)} XP! Congratulations!`
-        })
-
         logger.info(`Awarded ${user.id} ${user.name} the badge ${badge.id} ${badge.name}.`)
     }
 

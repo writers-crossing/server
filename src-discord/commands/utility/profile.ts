@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder, User, userMention } from 'discord.js'
+import { ChatInputCommandInteraction, GuildMember, SlashCommandBuilder, User } from 'discord.js'
 import config from '../../../data/config.json'
 import { getEntityUserByDiscordId } from '../../app/database'
 
