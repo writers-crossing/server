@@ -2,7 +2,7 @@ import config from '../../../data/config.json'
 
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { Sprint } from '../../app/entities'
-import { getActiveSprint, getEntityUserFromDiscordUser, getSprintLeaderboard, getSprintWinner } from '../../app/database'
+import { getActiveSprint, getEntityUserFromDiscordUser, getSprintWinner } from '../../app/database'
 import { getSprintTheme, waitMinutes } from '../../app/business'
 import logger from '../../app/logger'
 
@@ -21,7 +21,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
         return
     }
-    
+
     if (await getActiveSprint() != null) {
         await interaction.reply({
             content: 'You cannot start a sprint when one is already active.',
@@ -31,8 +31,28 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         return
     }
 
-    const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
     const sprintLengthMinutes = Math.floor(interaction.options.getNumber('minutes') ?? 20)
+
+    logger.info(`A sprint was started by ${interaction.user}.`)
+
+    const startResponse = await interaction.reply(`A sprint was started by ${interaction.user}!\nThis sprint will last for ${sprintLengthMinutes} minute(s). You will have ${config.sprintPrepTimeMinutes} minute(s) before this sprint begins.\nReact to this message to join the sprint.`)
+    const startMessage = await startResponse.fetch()
+    await startMessage.react('👍')
+    await waitMinutes(config.sprintPrepTimeMinutes)
+
+    const thumbsUpReactions = startMessage.reactions.cache.filter(reaction => reaction.emoji.name === '👍')
+    const participants = (await Promise.all(thumbsUpReactions.map(async reaction => {
+        const nonBotUsers = (await reaction.users.fetch()).filter(user => user.bot == false);
+        return nonBotUsers.map(x => x);
+    }))).flat();
+    const participantMentions = participants.map(x => x.toString()).join(" ")
+
+    if (participants.length >= 2 == false) {
+        await interaction.channel.send(`There were not at least 2 participants in this sprint. The sprint has been cancelled.`)
+        return
+    }
+
+    const user = await getEntityUserFromDiscordUser(interaction.user.id, interaction.user.username, interaction.user.avatar)
     const startTime = new Date(Date.now() + config.sprintPrepTimeMinutes * 60 * 1000)
     const endTime = new Date(startTime.getTime() + sprintLengthMinutes * 60 * 1000)
 
@@ -45,30 +65,19 @@ export async function execute(interaction: ChatInputCommandInteraction) {
         ended: false
     })
 
-    logger.info(`A sprint (${sprint.id}) was started by ${interaction.user}.`)
-
-    await interaction.reply(`A sprint was started by ${interaction.user}! This sprint will last for ${sprintLengthMinutes} minute(s).\nYou will have ${config.sprintPrepTimeMinutes} minute(s) before this sprint begins.\nGet ready!`)
-    await waitMinutes(config.sprintPrepTimeMinutes)
-
-    await interaction.channel.send(`The sprint has started!`)
+    await interaction.channel.send(`The sprint has started! ${participantMentions}`)
     await waitMinutes(sprintLengthMinutes)
 
-    await interaction.channel.send(`The sprint has ended!\nIn order to contribute to this sprint, you must submit word count with the project of \`sprint\`.\nPlease submit your word count now.`);
+    await interaction.channel.send(`The sprint has ended! Please submit your word count now.\n${participantMentions}`);
     await waitMinutes(config.sprintSubmissionTimeMinutes)
 
-    const leaderboard = await getSprintLeaderboard(sprint.id)
     const winner = await getSprintWinner(sprint.id)
 
     sprint.ended = true
-    sprint.winnerId = winner?.id
+    sprint.winnerId = winner.id
 
     await sprint.save()
 
-    if (winner) {
-        await interaction.channel.send(`Sprint has been closed for submission.\nThe winner for this sprint is <@${winner?.discordId}>!\nThe results for this sprint can be found here: <https://writers-crossing.com/sprints/${sprint.id}/>`);
-    } else {
-        await interaction.channel.send(`Sprint has been closed for submission.`);
-    }
-
-    logger.info(`Sprint ${sprint.id} has completed, returned ${leaderboard.length} rows.`)
+    await interaction.channel.send(`The winner for this sprint is <@${winner?.discordId}>!\nThe results for this sprint can be found here: <https://writers-crossing.com/sprints/${sprint.id}/>`)
+    logger.info(`Sprint ${sprint.id} has completed, had ${participants.length} participants.`)
 }

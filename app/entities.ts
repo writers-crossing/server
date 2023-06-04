@@ -234,6 +234,7 @@ export class WcEntry extends Model {
     public timestamp!: Date
     public wordCount!: number
     public project?: string
+    public for?: string
 
     public readonly createdAt!: Date
     public readonly updatedAt!: Date
@@ -257,6 +258,7 @@ WcEntry.init(
         timestamp: { type: DataTypes.DATE, allowNull: false },
         wordCount: { type: DataTypes.NUMBER, allowNull: false },
         project: { type: DataTypes.STRING, allowNull: true },
+        for: { type: DataTypes.STRING, allowNull: true },
     },
     {
         sequelize,

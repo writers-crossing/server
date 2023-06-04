@@ -1,6 +1,3 @@
-import config from '../data/config.json'
-import { formatWc } from './business'
-
 import sequelize, { Badge, UserBadges } from './entities'
 import { Sprint, WcEntry, User } from './entities'
 
@@ -161,12 +158,13 @@ export const recalculateUserMetrics = async (userId: string) => {
 export const getSprintWinner = async (sprintId: string) => {
     let winnerLeaderboard = await getSprintLeaderboard(sprintId, 1)
     let winnerUserId = (winnerLeaderboard[0] as any)['user_id'] as string | null
+    const winner = await User.findOne({ where: { id: winnerUserId } })
 
-    if (winnerUserId) {
-        return await User.findOne({ where: { id: winnerUserId } })
+    if (winner == null) {
+        throw new Error(`Cannot determine winner for sprint ${sprintId}.`)
     }
 
-    return null
+    return winner
 }
 
 export const getSprintLeaderboard = async (sprintId: string, limit = 99) => {
