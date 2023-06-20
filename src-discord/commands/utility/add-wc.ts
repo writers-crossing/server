@@ -13,7 +13,10 @@ export const data = new SlashCommandBuilder()
 	.setDescription('Adds word count to your total.')
 	.addNumberOption(x => x.setName('wordcount').setDescription('word count you would like to record').setMinValue(1).setMaxValue(50000).setRequired(true))
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
-	.addStringOption(x => x.setName('for').setDescription('what to contribute towards').setRequired(false))
+	.addStringOption(x => x.setName('for')
+		.setDescription('what to contribute towards')
+		.addChoices({ name: 'Sprint', value: 'sprint' }, { name: 'Timer', value: 'timer' })
+		.setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
 	if (interaction.channel?.id != config.discordStudyHallId) {
@@ -81,7 +84,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 			}
 		} else {
 			await interaction.reply({
-				content: 'You did not supply a correct for method',
+				content: 'You did not supply a correct "for" method',
 				ephemeral: true
 			})
 

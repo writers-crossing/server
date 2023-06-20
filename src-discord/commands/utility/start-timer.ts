@@ -8,7 +8,7 @@ export const data = new SlashCommandBuilder()
     .setName('start-timer')
     .setDMPermission(false)
     .setDescription('Starts a timer activity.')
-    .addNumberOption(x => x.setName('minutes').setDescription('number of minutes the timer will last').setMinValue(1).setMaxValue(60).setRequired(false))
+    .addNumberOption(x => x.setName('minutes').setDescription('number of minutes the timer will last').setMinValue(1).setMaxValue(180).setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
     if (interaction.channel?.id != config.discordStudyHallId) {
@@ -39,7 +39,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     timerTracker.ended = true
 
-    await interaction.channel.send(`The timer has ended! Please submit your word count now.`);
+    await interaction.channel.send(`The timer has ended ${interaction.user}. Please submit your word count now.`)
     await waitMinutes(config.sprintSubmissionTimeMinutes)
 
     store.timers.set(interaction.user.id, null)
