@@ -23,10 +23,9 @@ cron.schedule('0 0 * * *', async () => {
         for (const user of users) {
             logger.info(`Checking goals for user ${user.id} ${user.name}`)
 
-            if (checkForGoal(user.dailyGoal, user.wcDaily)) {
+            if (user.wcDaily > 0) {
                 user.dailyStreak += 1
-            }
-            else {
+            } else {
                 user.dailyStreak = 0
             }
 
