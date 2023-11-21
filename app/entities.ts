@@ -229,6 +229,33 @@ Sprint.init(
     }
 )
 
+export class Marathon extends Model {
+    public id!: string
+    public name!: string
+    public slug!: string
+    public startTime!: Date
+    public endTime!: Date
+}
+
+Marathon.init(
+    {
+        id: {
+            type: DataTypes.UUID,
+            defaultValue: DataTypes.UUIDV4,
+            allowNull: false,
+            primaryKey: true,
+        },
+        name: { type: DataTypes.STRING, allowNull: false },
+        slug: { type: DataTypes.STRING, allowNull: false },
+        startTime: { type: DataTypes.DATE, allowNull: false },
+        endTime: { type: DataTypes.DATE, allowNull: false }
+    },
+    {
+        sequelize,
+        modelName: 'Marathons',
+    }
+)
+
 export class WcEntry extends Model {
     public id!: string
     public timestamp!: Date

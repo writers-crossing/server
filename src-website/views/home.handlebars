@@ -1,3 +1,18 @@
+{{#each marathons }}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ name }}</strong> is now live!
+            </div>
+            <div>
+                <a href="/events/{{ slug }}" class="float-end btn btn-primary">
+                    Visit Leaderboard
+                </a>
+            </div>
+        </div>
+    </div>
+{{/each}}
+
 <div class="p-5 mb-4 bg-body-tertiary rounded-3">
     <div class="container-fluid py-2">
         <h1 class="display-5 fw-bold">Welcome in!</h1>

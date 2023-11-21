@@ -185,6 +185,24 @@ export const getSprintLeaderboard = async (sprintId: string, limit = 99) => {
     })
 }
 
+export const getWcEntryAggregateWithinDateRange = async (startDate: Date, endDate: Date, limit = 9999) => {
+    return await sequelize.query(`
+        SELECT ROW_NUMBER() OVER (ORDER BY SUM(wordCount) DESC) AS rowNumber,
+            Users.id AS user_id,
+            Users.name AS user_name,
+            SUM(wordCount) AS count
+        FROM WcEntries
+        INNER JOIN Users ON WcEntries.userId = Users.id
+        WHERE timestamp BETWEEN ? AND ?
+        GROUP BY userId
+        ORDER BY count DESC
+        LIMIT ?;
+    `, {
+        replacements: [startDate, endDate, limit],
+        type: QueryTypes.SELECT
+    })
+}
+
 export const getMonthLeaderboard = async (limit = 10) => {
     const users = await User.findAll({
         attributes: [
