@@ -9,7 +9,7 @@
   "license": "",
   "dependencies": {
     "@adminjs/express": "^6.0.0",
-    "@adminjs/sequelize": "^4.0.0",
+    "@adminjs/sequelize": "^4.1.1",
     "@faker-js/faker": "^7.6.0",
     "@handlebars/allow-prototype-access": "^1.0.5",
     "axios": "^1.4.0",
