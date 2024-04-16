@@ -10,7 +10,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@dice-roller/rpg-dice-roller": "^5.3.2",
+    "@dice-roller/rpg-dice-roller": "^5.5.0",
     "@faker-js/faker": "^7.6.0",
     "axios": "^1.6.0",
     "discord.js": "^14.10.0",
