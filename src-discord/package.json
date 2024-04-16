@@ -17,7 +17,7 @@
     "node-cron": "^3.0.2",
     "sequelize": "^6.31.1",
     "sqlite3": "^5.1.6",
-    "winston": "^3.8.2"
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@types/node-cron": "^3.0.7",
