@@ -2,7 +2,7 @@
   "name": "app",
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
-    "axios": "^1.4.0",
+    "axios": "^1.6.0",
     "sequelize": "^6.31.1",
     "sqlite3": "^5.1.6",
     "winston": "^3.8.2"
