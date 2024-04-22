@@ -10,7 +10,7 @@
   "dependencies": {
     "@adminjs/express": "^6.0.0",
     "@adminjs/sequelize": "^4.1.1",
-    "@faker-js/faker": "^7.6.0",
+    "@faker-js/faker": "^8.4.1",
     "@handlebars/allow-prototype-access": "^1.0.5",
     "axios": "^1.6.0",
     "express": "^4.19.2",
