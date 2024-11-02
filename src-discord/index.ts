@@ -1,3 +1,5 @@
+process.env.TZ = 'America/New_York'
+
 // https://discord.com/api/oauth2/authorize?client_id=1102814795012522024&permissions=58272035371840&scope=bot%20applications.commands
 // https://discord.com/api/oauth2/authorize?client_id=1102699152770605087&permissions=58272035371840&scope=bot%20applications.commands
 

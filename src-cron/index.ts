@@ -1,3 +1,5 @@
+process.env.TZ = 'America/New_York'
+
 import cron from 'node-cron'
 import logger from './app/logger'
 import { User } from './app/entities'

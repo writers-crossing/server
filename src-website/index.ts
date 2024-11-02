@@ -1,3 +1,5 @@
+process.env.TZ = 'America/New_York'
+
 import logger from "./app/logger";
 
 import express, { NextFunction } from "express";
