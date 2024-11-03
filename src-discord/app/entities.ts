@@ -84,9 +84,6 @@ export class UserBadges extends Model {
     public badge!: Badge
 
     public processed!: boolean
-
-    public readonly CreatedAt!: Date
-    public readonly UpdatedAt!: Date
 }
 
 UserBadges.init(
@@ -149,9 +146,6 @@ export class User extends Model {
 
     public readonly badges?: UserBadges[];
     public readonly wcEntries?: WcEntry[];
-
-    public readonly CreatedAt!: Date
-    public readonly UpdatedAt!: Date
 }
 
 User.init(
@@ -246,9 +240,6 @@ export class WcEntry extends Model {
     public wordCount!: number
     public project?: string
     public for?: string
-
-    public readonly CreatedAt!: Date
-    public readonly UpdatedAt!: Date
 
     // References
     public userId!: string
