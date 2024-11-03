@@ -73,6 +73,9 @@ Badge.init(
     {
         sequelize,
         modelName: 'Badges',
+        timestamps: true,
+        createdAt: 'CreatedAt',
+        updatedAt: 'UpdatedAt'
     }
 )
 
@@ -84,6 +87,9 @@ export class UserBadges extends Model {
     public badge!: Badge
 
     public processed!: boolean
+
+    public readonly CreatedAt!: Date
+    public readonly UpdatedAt!: Date
 }
 
 UserBadges.init(
@@ -146,6 +152,9 @@ export class User extends Model {
 
     public readonly badges?: UserBadges[];
     public readonly wcEntries?: WcEntry[];
+
+    public readonly CreatedAt!: Date
+    public readonly UpdatedAt!: Date
 }
 
 User.init(
@@ -186,6 +195,9 @@ User.init(
     {
         sequelize,
         modelName: 'Users',
+        timestamps: true,
+        createdAt: 'CreatedAt',
+        updatedAt: 'UpdatedAt'
     }
 )
 
@@ -231,6 +243,9 @@ Marathon.init(
     {
         sequelize,
         modelName: 'Marathons',
+        timestamps: true,
+        createdAt: 'CreatedAt',
+        updatedAt: 'UpdatedAt'
     }
 )
 
@@ -240,6 +255,9 @@ export class WcEntry extends Model {
     public wordCount!: number
     public project?: string
     public for?: string
+
+    public readonly CreatedAt!: Date
+    public readonly UpdatedAt!: Date
 
     // References
     public userId!: string
@@ -263,6 +281,9 @@ WcEntry.init(
     {
         sequelize,
         modelName: 'WcEntries',
+        timestamps: true,
+        createdAt: 'CreatedAt',
+        updatedAt: 'UpdatedAt'
     }
 )
 
