@@ -5,8 +5,12 @@ import logger from './logger'
 import config from '../../data/config.json'
 
 const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: config.databaseAbsolutePath,
+    dialect: 'postgres',
+    host: config.databaseHost,
+    port: config.databasePort,
+    database: config.databaseName,
+    username: config.databaseUser,
+    password: config.databasePassword,
     logging: (msg) => {
         if (msg.startsWith('Executing')) {
             logger.debug(msg);
