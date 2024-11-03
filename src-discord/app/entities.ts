@@ -287,8 +287,8 @@ WcEntry.init(
     }
 )
 
-User.hasMany(WcEntry, { foreignKey: { name: 'UserId', field: 'UserId' } })
-WcEntry.belongsTo(User, { foreignKey: { name: 'UserId', field: 'UserId' } })
+User.hasMany(WcEntry, { foreignKey: { name: 'userId', field: 'UserId' } })
+WcEntry.belongsTo(User, { foreignKey: { name: 'userId', field: 'UserId' } })
 
-UserBadges.belongsTo(Badge, { foreignKey: { name: 'BadgeId', field: 'BadgeId' } })
-UserBadges.belongsTo(User, { foreignKey: { name: 'UserId', field: 'UserId' } })
+UserBadges.belongsTo(Badge, { foreignKey: { name: 'badgeId', field: 'BadgeId' } })
+UserBadges.belongsTo(User, { foreignKey: { name: 'userId', field: 'UserId' } })
