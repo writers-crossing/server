@@ -131,8 +131,6 @@ export class User extends Model {
     public isHidden!: boolean
 
     public readonly badges?: UserBadges[];
-    public readonly sprints?: Sprint[];
-    public readonly sprintsWon?: Sprint[];
     public readonly wcEntries?: WcEntry[];
 
     public readonly createdAt!: Date
@@ -195,40 +193,6 @@ User.afterUpdate(async (user) => {
     if (user.changed('discordAvatar')) await downloadUserAvatar(user);
 })
 
-export class Sprint extends Model {
-    public id!: string
-    public name!: string
-    public length!: number
-    public startTime!: Date
-    public endTime!: Date
-    public ended!: boolean
-
-    public winnerId?: string
-
-    public readonly createdAt!: Date
-    public readonly updatedAt!: Date
-}
-
-Sprint.init(
-    {
-        id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
-            allowNull: false,
-            primaryKey: true,
-        },
-        name: { type: DataTypes.STRING, allowNull: false },
-        length: { type: DataTypes.NUMBER, allowNull: false },
-        startTime: { type: DataTypes.DATE, allowNull: false },
-        endTime: { type: DataTypes.DATE, allowNull: false },
-        ended: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
-    },
-    {
-        sequelize,
-        modelName: 'Sprints',
-    }
-)
-
 export class Marathon extends Model {
     public id!: string
     public name!: string
@@ -268,10 +232,7 @@ export class WcEntry extends Model {
 
     // References
     public userId!: string
-    public sprintId!: string
-
     public readonly user!: User
-    public readonly sprint?: Sprint
 }
 
 WcEntry.init(
@@ -295,15 +256,6 @@ WcEntry.init(
 
 User.hasMany(WcEntry, { foreignKey: 'userId' })
 WcEntry.belongsTo(User, { foreignKey: 'userId' })
-
-User.hasMany(Sprint, { foreignKey: 'createdBy' })
-Sprint.belongsTo(User, { foreignKey: 'createdBy' })
-
-User.hasMany(Sprint, { foreignKey: 'winnerId' })
-Sprint.belongsTo(User, { foreignKey: 'winnerId' })
-
-Sprint.hasMany(WcEntry, { foreignKey: 'sprintId' })
-WcEntry.belongsTo(Sprint, { foreignKey: 'sprintId' })
 
 UserBadges.belongsTo(Badge, { foreignKey: 'badgeId' })
 UserBadges.belongsTo(User, { foreignKey: 'userId' })

@@ -2,8 +2,8 @@ import config from '../../../data/config.json'
 
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { formatWc } from '../../app/business'
-import { Sprint, WcEntry } from '../../app/entities'
-import { getEntityUserFromDiscordUser, getActiveSprint } from '../../app/database'
+import { WcEntry } from '../../app/entities'
+import { getEntityUserFromDiscordUser } from '../../app/database'
 import logger from '../../app/logger'
 import { store } from '../../store'
 
@@ -15,7 +15,7 @@ export const data = new SlashCommandBuilder()
 	.addStringOption(x => x.setName('project').setDescription('project name').setRequired(false))
 	.addStringOption(x => x.setName('for')
 		.setDescription('what to contribute towards')
-		.addChoices({ name: 'Sprint', value: 'sprint' }, { name: 'Timer', value: 'timer' })
+		.addChoices({ name: 'Timer', value: 'timer' })
 		.setRequired(false))
 
 export async function execute(interaction: ChatInputCommandInteraction) {
@@ -33,37 +33,10 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 	const project = interaction.options.getString('project')
 	const addFor = interaction.options.getString('for')?.toLowerCase() ?? null
 
-	let activeSprint = await getActiveSprint()
 	let activeTimer = store.timers.get(interaction.user.id) ?? null
-	let sprint: Sprint | null = null
 
 	if (addFor) {
-		if (addFor === 'sprint') {
-			// Determine if there is a sprint and count it towards that.
-			if (activeSprint === null) {
-				await interaction.reply({
-					content: 'There is no sprint active right now, you cannot submit WC.',
-					ephemeral: true
-				})
-
-				return
-			}
-
-			const now = Date.now()
-			const endTime = activeSprint.endTime.getTime()
-			const endTimePlus10 = endTime + 10 * 60 * 1000
-
-			if (now < endTime || now > endTimePlus10) {
-				await interaction.reply({
-					content: 'It is not time yet to submit yet for the sprint. Please wait until after the sprint ends.',
-					ephemeral: true
-				})
-
-				return
-			}
-
-			sprint = activeSprint
-		} else if (addFor === 'timer') {
+		if (addFor === 'timer') {
 			// Determine if there is a timer and count it towards that.
 			if (activeTimer === null) {
 				await interaction.reply({
@@ -97,7 +70,6 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		wordCount: wordCount,
 		project: project,
 		for: addFor?.toLowerCase() ?? null,
-		sprintId: sprint?.id,
 		userId: user.id
 	})
 
@@ -109,10 +81,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
 	await user.save()
 
-	if (addFor === 'sprint' && sprint) {
-		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words to sprint ${sprint.id}.`)
-		await interaction.reply(`${interaction.user} has contributed to the sprint.`)
-	} else if (addFor === 'timer') {
+	if (addFor === 'timer') {
 		logger.info(`${interaction.user.username}/${interaction.user.id} contributed ${wcEntry.wordCount} words to timer. Their current total for the day is ${formatWc(user.wcDaily)} words.`)
 		await interaction.reply(`${interaction.user} has contributed to their timer.\nTheir current total for the day is ${formatWc(user.wcDaily)} words.`)
 

@@ -1,6 +1,6 @@
 import config from '../../../data/config.json'
 
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder, TextChannel } from 'discord.js'
 import { waitMinutes } from '../../app/business'
 import { TimerTracker, store } from '../../store'
 
@@ -39,7 +39,11 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 
     timerTracker.ended = true
 
-    await interaction.channel.send(`The timer has ended ${interaction.user}. Please submit your word count now.`)
+    const channel = interaction.channel as TextChannel
+    if (channel) {
+        await channel.send(`The timer has ended ${interaction.user}. Please submit your word count now.`)
+    }
+    
     await waitMinutes(config.sprintSubmissionTimeMinutes)
 
     store.timers.set(interaction.user.id, null)
