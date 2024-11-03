@@ -2,7 +2,7 @@ import { Sequelize, DataTypes, Model } from 'sequelize'
 import { writeFileSync } from 'node:fs'
 import axios from 'axios'
 import logger from './logger'
-import config from '../data/config.json'
+import config from '../../data/config.json'
 
 const sequelize = new Sequelize({
     dialect: 'sqlite',

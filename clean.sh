@@ -7,23 +7,7 @@ pm2 flush || true
 cd /git/server/
 git pull
 
-cd /git/server/app/
-rm -rf node_modules || true
-npm install
-
 cd /git/server/src-discord/
-rm app.log || true
-rm app-error.log || true
-rm -rf node_modules || true
-npm install
-
-cd /git/server/src-website/
-rm app.log || true
-rm app-error.log || true
-rm -rf node_modules || true
-npm install
-
-cd /git/server/src-cron/
 rm app.log || true
 rm app-error.log || true
 rm -rf node_modules || true

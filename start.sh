@@ -12,14 +12,4 @@ rm app.log || true
 rm app-error.log || true
 pm2 start npm --name wc-discord -- start
 
-cd /git/server/src-website/
-rm app.log || true
-rm app-error.log || true
-pm2 start npm --name wc-website -- start
-
-cd /git/server/src-cron/
-rm app.log || true
-rm app-error.log || true
-pm2 start npm --name wc-cron -- start
-
 pm2 save
