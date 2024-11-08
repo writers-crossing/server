@@ -68,8 +68,7 @@ Badge.init(
         sequelize,
         modelName: 'badges',
         timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        underscored: true
     }
 )
 
@@ -115,6 +114,7 @@ UserBadges.init(
     {
         sequelize,
         tableName: 'user_badges',
+        underscored: true
     }
 )
 
@@ -185,8 +185,7 @@ User.init(
         sequelize,
         modelName: 'users',
         timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        underscored: true
     }
 )
 
@@ -232,8 +231,7 @@ Marathon.init(
         sequelize,
         modelName: 'marathons',
         timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        underscored: true
     }
 )
 
@@ -269,8 +267,7 @@ WcEntry.init(
         sequelize,
         modelName: 'wc_entries',
         timestamps: true,
-        createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        underscored: true
     }
 )
 
