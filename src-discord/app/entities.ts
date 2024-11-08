@@ -41,41 +41,35 @@ Badge.init(
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             allowNull: false,
-            primaryKey: true,
-            field: 'Id'
+            primaryKey: true
         },
         name: {
             type: DataTypes.STRING,
-            allowNull: false,
-            field: 'Name'
+            allowNull: false
         },
         icon: {
             type: DataTypes.STRING,
-            allowNull: false,
-            field: 'Icon'
+            allowNull: false
         },
         hexdecimalColor: {
             type: DataTypes.STRING,
-            allowNull: false,
-            field: 'HexdecimalColor'
+            allowNull: false
         },
         description: {
             type: DataTypes.STRING,
-            allowNull: false,
-            field: 'Description'
+            allowNull: false
         },
         xp: {
             type: DataTypes.NUMBER,
-            allowNull: false,
-            field: 'Xp'
+            allowNull: false
         }
     },
     {
         sequelize,
-        modelName: 'Badges',
+        modelName: 'badges',
         timestamps: true,
-        createdAt: 'CreatedAt',
-        updatedAt: 'UpdatedAt'
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     }
 )
 
@@ -98,32 +92,29 @@ UserBadges.init(
             type: DataTypes.UUID,
             allowNull: false,
             primaryKey: true,
-            field: 'UserId',
             references: {
-                model: 'User',
-                key: 'Id',
+                model: 'user',
+                key: 'id',
             },
         },
         badgeId: {
             type: DataTypes.UUID,
             allowNull: false,
             primaryKey: true,
-            field: 'BadgeId',
             references: {
-                model: 'Badge',
-                key: 'Id',
+                model: 'badge',
+                key: 'id',
             },
         },
         processed: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
-            allowNull: false,
-            field: 'Processed'
+            allowNull: false
         },
     },
     {
         sequelize,
-        tableName: 'UserBadges',
+        tableName: 'user_badges',
     }
 )
 
@@ -163,41 +154,39 @@ User.init(
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             allowNull: false,
-            primaryKey: true,
-            field: 'Id'
+            primaryKey: true
         },
-        name: { type: DataTypes.STRING, allowNull: false, field: 'Name' },
+        name: { type: DataTypes.STRING, allowNull: false },
         discordId: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
-            field: 'DiscordId'
+            unique: true
         },
-        discordUsername: { type: DataTypes.STRING, allowNull: false, field: 'DiscordUsername' },
-        discordAvatar: { type: DataTypes.STRING, allowNull: true, field: 'DiscordAvatar' },
+        discordUsername: { type: DataTypes.STRING, allowNull: false },
+        discordAvatar: { type: DataTypes.STRING, allowNull: true },
 
-        wcDaily: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'WcDaily' },
-        wcWeekly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'WcWeekly' },
-        wcMonthly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'WcMonthly' },
-        wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'WcYearly' },
-        wcTotal: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'WcTotal' },
+        wcDaily: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+        wcWeekly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+        wcMonthly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+        wcYearly: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
+        wcTotal: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
 
-        dailyStreak: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false, field: 'DailyStreak' },
+        dailyStreak: { type: DataTypes.NUMBER, defaultValue: 0, allowNull: false },
 
-        dailyGoal: { type: DataTypes.NUMBER, allowNull: true, field: 'DailyGoal' },
-        weeklyGoal: { type: DataTypes.NUMBER, allowNull: true, field: 'WeeklyGoal' },
-        monthlyGoal: { type: DataTypes.NUMBER, allowNull: true, field: 'MonthlyGoal' },
-        yearlyGoal: { type: DataTypes.NUMBER, allowNull: true, field: 'YearlyGoal' },
+        dailyGoal: { type: DataTypes.NUMBER, allowNull: true },
+        weeklyGoal: { type: DataTypes.NUMBER, allowNull: true },
+        monthlyGoal: { type: DataTypes.NUMBER, allowNull: true },
+        yearlyGoal: { type: DataTypes.NUMBER, allowNull: true },
 
-        isInactive: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false, field: 'IsInactive' },
-        isHidden: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false, field: 'IsHidden' }
+        isInactive: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false },
+        isHidden: { type: DataTypes.BOOLEAN, defaultValue: false, allowNull: false }
     },
     {
         sequelize,
-        modelName: 'Users',
+        modelName: 'users',
         timestamps: true,
-        createdAt: 'CreatedAt',
-        updatedAt: 'UpdatedAt'
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     }
 )
 
@@ -232,20 +221,19 @@ Marathon.init(
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             allowNull: false,
-            primaryKey: true,
-            field: 'Id'
+            primaryKey: true
         },
-        name: { type: DataTypes.STRING, allowNull: false, field: 'Name' },
-        slug: { type: DataTypes.STRING, allowNull: false, field: 'Slug' },
-        startTime: { type: DataTypes.DATE, allowNull: false, field: 'StartTime' },
-        endTime: { type: DataTypes.DATE, allowNull: false, field: 'EndTime' }
+        name: { type: DataTypes.STRING, allowNull: false },
+        slug: { type: DataTypes.STRING, allowNull: false },
+        startTime: { type: DataTypes.DATE, allowNull: false },
+        endTime: { type: DataTypes.DATE, allowNull: false }
     },
     {
         sequelize,
-        modelName: 'Marathons',
+        modelName: 'marathons',
         timestamps: true,
-        createdAt: 'CreatedAt',
-        updatedAt: 'UpdatedAt'
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     }
 )
 
@@ -270,25 +258,24 @@ WcEntry.init(
             type: DataTypes.UUID,
             defaultValue: DataTypes.UUIDV4,
             allowNull: false,
-            primaryKey: true,
-            field: 'Id'
+            primaryKey: true
         },
-        timestamp: { type: DataTypes.DATE, allowNull: false, field: 'Timestamp' },
-        wordCount: { type: DataTypes.NUMBER, allowNull: false, field: 'WordCount' },
-        project: { type: DataTypes.STRING, allowNull: true, field: 'Project' },
-        for: { type: DataTypes.STRING, allowNull: true, field: 'For' },
+        timestamp: { type: DataTypes.DATE, allowNull: false },
+        wordCount: { type: DataTypes.NUMBER, allowNull: false },
+        project: { type: DataTypes.STRING, allowNull: true },
+        for: { type: DataTypes.STRING, allowNull: true },
     },
     {
         sequelize,
-        modelName: 'WcEntries',
+        modelName: 'wc_entries',
         timestamps: true,
-        createdAt: 'CreatedAt',
-        updatedAt: 'UpdatedAt'
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     }
 )
 
-User.hasMany(WcEntry, { foreignKey: { name: 'userId', field: 'UserId' } })
-WcEntry.belongsTo(User, { foreignKey: { name: 'userId', field: 'UserId' } })
+User.hasMany(WcEntry, { foreignKey: { name: 'userId', field: 'user_id' } })
+WcEntry.belongsTo(User, { foreignKey: { name: 'userId', field: 'user_id' } })
 
-UserBadges.belongsTo(Badge, { foreignKey: { name: 'badgeId', field: 'BadgeId' } })
-UserBadges.belongsTo(User, { foreignKey: { name: 'userId', field: 'UserId' } })
+UserBadges.belongsTo(Badge, { foreignKey: { name: 'badgeId', field: 'badge_id' } })
+UserBadges.belongsTo(User, { foreignKey: { name: 'userId', field: 'user_id' } })
